@@ -32,26 +32,21 @@ FittingMeshViewer::FittingMeshViewer(void)
 {
 	restoreStateFromFile();
 	surfacedata = NULL;
-	//error = NULL;
-	//dens_ind = NULL;
-	//err_ind = NULL;
+	
 	bfitted_mesh_view = true;
 	 berror_show = false;
 	 bmax_error_point_show = false;
-	//bcurvature_show = false;
-	//bdensityshow = false;
-	//bcontrolmesh_show = false;
+	
 	 bcontroledge_show = false;
 	badjustedmesh_show = false;
-	//badjusted_control_mesh = false;
+
 	  badjust = false;
 	  max_err = 1;
-	//index = -1;*/
+	
 	setAutoBufferSwap( false );
 	setAutoFillBackground( false );
 	setMouseTracking(true);
-	/*bsparsemeshview = false;
-	bsparsecurvesview = false;*/
+	
 	bBox = Bbox_3(-1, 1, -1, 1, -1, 1);
 }
 
@@ -61,24 +56,13 @@ FittingMeshViewer::~FittingMeshViewer(void)
 }
 void FittingMeshViewer::clear_data()
 {
-	/*error = NULL;
-	dens_ind = NULL;
-	err_ind = NULL;*/
+
 	bfitted_mesh_view = false;
 	 berror_show = false;
-	//bcurvature_show = false;
-	//bdensityshow = false;
-	//bcontrolmesh_show = false;
+	
 	bcontroledge_show = false;
 	badjustedmesh_show = false;
-	/*badjusted_control_mesh = false;
-	badjust = false;
-	bsparsemeshview = false;
-	bsparsecurvesview = false;*/
-	/*originalMeshVertices.clear();
-	originalMeshNormals.clear();
-	fittedMeshVertices.clear();
-	fittedMeshNormals.clear();*/
+	
 	bBox = Bbox_3(-1, 1, -1, 1, -1, 1);
 
 }
@@ -141,23 +125,6 @@ void FittingMeshViewer::draw()
 	}
 	if(berror_show)
 		draw_error_mesh();
-
-	/*if(bcurvature_show)
-		draw_curvature_mesh();
-	if(bsparsemeshview)
-		draw_sparsemesh();
-	if(bsparsecurvesview)
-		draw_sparsecurves();
-	if(bdensityshow)
-		draw_density_mesh();
-	if(bcontrolmesh_show)
-		draw_control_mesh();
-
-	if(badjusted_control_mesh)
-		draw_adjusted_control_mesh();
-
-	if(badjustedmesh_show)
-		draw_adjusted_mesh();*/
 
 	glShadeModel(GL_FLAT);
 	glDisable(GL_DEPTH_TEST);
@@ -482,7 +449,6 @@ void FittingMeshViewer::paintEvent(QPaintEvent *event)
 	glPopAttrib();
 	
 
-	painter.begin(this);
 	if(berror_show)
 		draw_error_colorbar(&painter);
 	/*if(bdensityshow)
@@ -738,23 +704,7 @@ void FittingMeshViewer::set_adjustpoints_enabled(bool av)
 	badjust = av;
 	updateGL();
 }
-//
-//void FittingMeshViewer::set_adjusted_control_enabled(bool av)
-//{
-//	badjusted_control_mesh = av;
-//	updateGL();
-//}
-//
-//int &FittingMeshViewer::get_index()
-//{
-//	return index;
-//}
-//
-//Point_3 &FittingMeshViewer::get_postion()
-//{
-//	return pos;
-//}
-//
+
 bool FittingMeshViewer::write_mesh(QString &fileName, Mesh_Type type)
 {
 	Mesh* mesh = NULL;
@@ -770,24 +720,6 @@ bool FittingMeshViewer::write_mesh(QString &fileName, Mesh_Type type)
 	wopt2+=OpenMesh::IO::Options::VertexColor;
 
 
-
-
-	/*if(type==Curvature_Mesh)
-	{
-		mesh = surfacedata->get_original_mesh();
-		if(mesh)
-		{
-			mesh->write_obj(fileName, true);
-		}
-	}
-	if(type==Density_Mesh)
-	{
-		mesh = surfacedata->get_density_mesh();
-		if(mesh)
-		{
-			mesh->write_obj(fileName, true);
-		}
-	}*/
 	if(type==Fitted_Mesh)
 	{
 		mesh = surfacedata->get_fitted_mesh();
@@ -809,84 +741,6 @@ bool FittingMeshViewer::write_mesh(QString &fileName, Mesh_Type type)
 		}
 		
 	}
- 
-	//if(type==Control_Mesh)
-	//{//Control Mesh
-	//	//mesh = surfacedata->get_control_mesh();
-	//	///*Polyhedron::Edge_iterator e_it = mesh->edges_begin();
-	//	//*/
-	//	//
-	//	//if(mesh)
-	//	//{
-	//	//	mesh->write_ve_obj(fileName);
-	//	//}
-	//	Point_3 *control_vertices = surfacedata->get_control_vertices();
-	//	if(!control_vertices)
-	//		return false;
-	//	QFile file( fileName);
-	//	if ( file.open(QIODevice::WriteOnly)) 
-	//	{
-	//		QTextStream out( &file );
-	//		basis_size = surfacedata->get_basis_size();
-	//		out << "g object" << endl;
-	//		for(int i=0; i<basis_size; i++)
-	//		{
-	//			out << "v " <<control_vertices[i].x() << " " << control_vertices[i].y() << " " << control_vertices[i].z() << endl;
-	//		}
-	//		vector<Edge> edges = surfacedata->get_control_edges_auxiliary();
-	//		for(int i=0; i<edges.size(); i++)
-	//		{
-	//			int first = edges[i].first+1;
-	//			int second = edges[i].second+1;
-	//			out << "l " << first << " " << second << endl;
-	//		}
-	//	}
-	//}
-
-	//if(type==Control_Edges)
-	//{
-	//	Point_3 *control_vertices = surfacedata->get_control_vertices();
-	//	if(!control_vertices)
-	//		return false;
-	//	QFile file( fileName);
-	//	if ( file.open(QIODevice::WriteOnly)) 
-	//	{
-	//		QTextStream out( &file );
-	//		basis_size = surfacedata->get_basis_size();
-	//		out << "g object" << endl;
-	//		for(int i=0; i<basis_size; i++)
-	//		{
-	//			out << "v " <<control_vertices[i].x() << " " << control_vertices[i].y() << " " << control_vertices[i].z() << endl;
-	//		}
-
-	//		vector<Edge> edges = surfacedata->get_control_edges();
-	//		vector<Edge> edges_auxiliary = surfacedata->get_control_edges_auxiliary();
-	//		int sz = edges_auxiliary.size();
-	//		for(int i=0; i<edges.size(); i++)
-	//		{
-	//			int first = edges[i].first;
-	//			int second = edges[i].second;
-	//			for(int j=0; j<sz; j++)
-	//			{
-	//				if(first == edges_auxiliary[j].first && second == edges_auxiliary[j].second)
-	//				{
-	//					out << "l " << first+1 << " " << second+1 << endl;
-	//					if(second == edges_auxiliary[(j+1)%sz].first && first == edges_auxiliary[(j+1)%sz].second)
-	//					{
-	//						out << "l " << second+1 << " " << first+1 << endl;
-	//						break;
-	//					}
-	//					if(second == edges_auxiliary[(j-1)%sz].first && first == edges_auxiliary[(j-1)%sz].second)
-	//					{
-	//						out << "l " << second+1 << " " << first+1 << endl;
-	//						break;
-	//					}
-	//					break;
-	//				}	
-	//			}
-	//		}
-	//	}
-	//}
 
 	return true;
 }
@@ -948,44 +802,3 @@ void FittingMeshViewer::set_controledge_show(bool cv)
 
 
 }
-
-//void FittingMeshViewer::set_sparsemesh_view(bool sv)
-//{
-//	bsparsemeshview = sv;
-//}
-//
-//void FittingMeshViewer::set_sparsecurves_view(bool sv)
-//{
-//	bsparsecurvesview = sv;
-//}
-//
-//void FittingMeshViewer::set_featureline_view(bool fv)
-//{
-//	bfeaturelineview = fv;
-//}
-//
-//void FittingMeshViewer::draw_featurelines()
-//{
-//	if(surfacedata==NULL)
-//		return;
-//
-//	Polyhedron *mesh = surfacedata->get_original_mesh();
-//	if(mesh != NULL)
-//	{
-//		struct FeaturesInfo ridges = mesh->getRidges();
-//		glColor3d(1.0, 0.0, 0.0);
-//		glLineWidth(2.0f);
-//		for (int i=0; i<ridges.fFNum; i++)
-//		{
-//			if(ridges.eFids[i].fId != -1)
-//			{
-//				glBegin(GL_LINES);
-//					glVertex3d(ridges.fps[ridges.eFids[i].vId1].x, ridges.fps[ridges.eFids[i].vId1].y, ridges.fps[ridges.eFids[i].vId1].z);
-//					glVertex3d(ridges.fps[ridges.eFids[i].vId2].x, ridges.fps[ridges.eFids[i].vId2].y, ridges.fps[ridges.eFids[i].vId2].z);
-//				glEnd();
-//			}
-//		}
-//		
-//	}
-//	
-//}

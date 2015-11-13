@@ -183,6 +183,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\KnotsViewer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\main.cpp"
 				>
 			</File>
@@ -196,10 +200,6 @@
 			</File>
 			<File
 				RelativePath=".\MeshViewer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\splineknotsviewer.cpp"
 				>
 			</File>
 			<File
@@ -307,6 +307,32 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\KnotsViewer.h"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing KnotsViewer.h..."
+						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -D_USE_MATH_DEFINES -DNOMINMAX &quot;-I.\GeneratedFiles&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot;&#x0D;&#x0A;"
+						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
+						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing KnotsViewer.h..."
+						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -D_USE_MATH_DEFINES -DNOMINMAX &quot;-ID:\Eigen3.2.3\eigen-eigen-36fd1ba04c12&quot; &quot;-I.\GeneratedFiles&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot;&#x0D;&#x0A;"
+						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
+						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\mainwindow.h"
 				>
 				<FileConfiguration
@@ -387,32 +413,6 @@
 			<File
 				RelativePath=".\resource.h"
 				>
-			</File>
-			<File
-				RelativePath=".\splineknotsviewer.h"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Moc&apos;ing splineknotsviewer.h..."
-						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -D_USE_MATH_DEFINES -DNOMINMAX &quot;-I.\GeneratedFiles&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot;&#x0D;&#x0A;"
-						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
-						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Moc&apos;ing splineknotsviewer.h..."
-						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -D_USE_MATH_DEFINES -DNOMINMAX &quot;-ID:\Eigen3.2.3\eigen-eigen-36fd1ba04c12&quot; &quot;-I.\GeneratedFiles&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot;&#x0D;&#x0A;"
-						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
-						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\SurfaceData.h"
@@ -808,6 +808,18 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\GeneratedFiles\Release\moc_KnotsViewer.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath=".\GeneratedFiles\Release\moc_mainwindow.cpp"
 					>
 					<FileConfiguration
@@ -833,18 +845,6 @@
 				</File>
 				<File
 					RelativePath=".\GeneratedFiles\Release\moc_meshviewer.cpp"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\GeneratedFiles\Release\moc_splineknotsviewer.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -910,6 +910,18 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\GeneratedFiles\Debug\moc_KnotsViewer.cpp"
+					>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath=".\GeneratedFiles\Debug\moc_mainwindow.cpp"
 					>
 					<FileConfiguration
@@ -935,18 +947,6 @@
 				</File>
 				<File
 					RelativePath=".\GeneratedFiles\Debug\moc_meshviewer.cpp"
-					>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\GeneratedFiles\Debug\moc_splineknotsviewer.cpp"
 					>
 					<FileConfiguration
 						Name="Release|Win32"

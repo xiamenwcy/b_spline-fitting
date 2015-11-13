@@ -23,7 +23,7 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 
-#include "splineknotsviewer.h"
+#include "knotsViewer.h"
 
 class QAction;
 class QLabel;
@@ -51,16 +51,16 @@ private:
 	/**  core surface data */
 	CSurfaceData *surfacedata;
 	/** 三维绘图类，是KnotSubWindow的中心区域部件 */
-	SplineKnotsViewer *knotsViewer;
-	/** 节点线显示菜单选项  */
+	KnotsViewer *knotsViewer;
+	/** 节点线显示菜单项  */
 	QAction *knotsAction;
-	/** 曲率显示菜单选项   */
+	/** 曲率显示菜单项   */
 	QAction *curvatureAction;
-	/** 网格显示菜单选项  */
+	/** 网格显示菜单项  */
 	QAction *domainmeshAction;
-	/** 曲率积分误差菜单选项 */
+	/** 曲率积分误差菜单项 */
 	QAction *curvature_error_Action;
-	/** 拟合误差菜单选项    */
+	/** 拟合误差菜单项    */
 	QAction *fitting_error_Action;
 	
     /** 视图显示菜单 */

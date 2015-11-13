@@ -19,7 +19,15 @@
 #include <windows.h> 
 #include <vector>
 using std::vector;
-
+/** B spline parameter.
+    It contains :
+	- p,q: degree of surface.
+	- m,n: number of control points.
+	- uknots: vertical knot line coordinate(or u coordinate).
+	- vknots: horizonal knot line coordinate(or v coordinate).
+	- num_u: num of u line.
+	- num_v: num of v line.
+*/
 class B_parameter
 {
 public:

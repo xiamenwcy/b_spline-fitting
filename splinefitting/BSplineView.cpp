@@ -17,7 +17,7 @@
 //STL
 #include <iostream>
 #include <vector>
-#include <math.h>
+#include <cmath>
 #include <fstream>
 
 //Eigen
@@ -31,7 +31,6 @@
 using namespace Eigen;
 using namespace  std;
 
-#define  EPSILON4 0.00001
 
 
 
@@ -39,19 +38,16 @@ using namespace  std;
 CBSplineSurfaceView::CBSplineSurfaceView()
 {
 	parameter=NULL;
-	m_pFittedMesh=NULL;
-	
-
-	
+	m_pFittedMesh=NULL;	
 
 }
 CBSplineSurfaceView ::~CBSplineSurfaceView()
 {
-
+   delete m_pFittedMesh;
 }
 bool CBSplineSurfaceView::solvecontrolpoint(Mesh *mesh)
 {
-     int  p_num=mesh->n_vertices();
+    int  p_num=mesh->n_vertices();
 	ofstream out_file( "ControlPoint.txt" );
 	ofstream  pa_file("Parameter.txt");
 	ofstream  num("num.txt");
@@ -103,39 +99,13 @@ bool CBSplineSurfaceView::solvecontrolpoint(Mesh *mesh)
 		double u=vt[0];
 		double v=vt[1];
 		int sum=0;
-#if 0
-		double sum=0.0;
-		for(int i=0;i<=m;i++)
-			for (int j=0;j<=n;j++)
-			{
-				sum+=Base(i,p+1,uknot,m+p+2,u)*Base(j,q+1,vknot,n+q+2,v);
-			}
-			if (abs(sum-1)>EPSILON4)
-			{
-				cout<<(*v_it).idx()<<endl;
-				if (mesh->is_boundary(*v_it))
-					cout<<"边界点之和"<<" ";
-				cout<<sum<<endl;
-			}
-#endif
+
 		for (int j=0;j<(m+1)*(n+1);j++)
 		{
 			k=j/(n+1);
 			l=j%(n+1);
 			if (u>=uknot[k]&&u<=uknot[k+p+1]&&v>=vknot[l]&&v<=vknot[l+q+1])
 			{
-#if 0
-				A.coeffRef(row_index,j)=Base(k,p+1,uknot,m+p+2,u)*Base(l,q+1,vknot,n+q+2,v);
-				if (A.coeffRef(row_index,j)==0)
-				{
-					double t1=Base(k,p+1,uknot,m+p+2,u);
-					double t2=Base(l,q+1,vknot,n+q+2,v);
-					t1=Base(0,q+1,vknot,n+q+2,0);
-					t2=Base(0,q+1,vknot,n+q+2,0.2);
-					cout<<row_index<<" "<<j<<endl;
-				}
-				assert(A.coeffRef(row_index,j)!=0);
-#endif 
 				double t1=Base(k,p+1,uknot,m+p+2,u);
 				double t2=Base(l,q+1,vknot,n+q+2,v);
 				if (t1!=0&&t2!=0)
@@ -148,15 +118,15 @@ bool CBSplineSurfaceView::solvecontrolpoint(Mesh *mesh)
 		}
 		num<<"第"<<row_index<<"行的非零数为"<<sum<<endl;
 	}
-for (int i=0;i<m+p+2;i++)
-{
-	num<<"u"<<"["<<i<<"]="<<uknot[i]<<endl;
-}
+		for (int i=0;i<m+p+2;i++)
+		{
+			num<<"u"<<"["<<i<<"]="<<uknot[i]<<endl;
+		}
 
-for (int i=0;i<n+q+2;i++)
-{
-	num<<"v"<<"["<<i<<"]="<<vknot[i]<<endl;
-}
+		for (int i=0;i<n+q+2;i++)
+		{
+			num<<"v"<<"["<<i<<"]="<<vknot[i]<<endl;
+		}
 		//求解方程右端矩阵b 
 		MatrixXd b(p_num,3),P((m+1)*(n+1),3);
 		int h=0;
@@ -182,76 +152,25 @@ for (int i=0;i<n+q+2;i++)
 			// solving failed
 			return false;
 		}
-	#if 0
-		A.makeCompressed(); 
-		pa_file<<"A"<<A<<endl;
-     //QR最小二乘法
-		SparseQR<SparseMatrix<double>,COLAMDOrdering<int> >  solver;
-		solver.compute(A);
-		if(solver.info()!=Success) {
-			// decomposition failed
-			return false;
-		}
-		P=solver.solve(b);
-		if(solver.info()!=Success) {
-			// solving failed
-			return false;
-		}
-#endif
-#if 0
-		SparseMatrix<double>  B=A.transpose()*A;
-		B.makeCompressed(); 
-		pa_file<<"A"<<A<<endl;
-		pa_file<<"B"<<B<<endl;
-	  ConjugateGradient<SparseMatrix<double> > solver;//for selfadjoint (hermitian) matrices//迭代
-	  solver.compute(B);
-	  P=solver.solve(A.transpose()*b);
-#endif
-
-#if 0
-		BiCGSTAB<SparseMatrix<double> > solver;// for general square matrices//迭代
-		// fill A and b;
-		// Compute the ordering permutation vector from the structural pattern of A
-		solver.compute(B);
-		//Use the factors to solve the linear system 
-		P=solver.solve(A.transpose()*b); 
-
-#endif
-#if 0
-	   SparseMatrix<double>  B=A.transpose()*A;
-	   /* MatrixXd ones = B;
-	 VectorXcd eivals = ones.eigenvalues();
-	 cout << "The eigenvalues of the  matrix of ones are:" << endl << eivals << endl;*/
-		SimplicialLDLT<SparseMatrix<double> > solver;
-		solver.compute(B);
-		if(solver.info()!=Success) {
-			// decomposition failed
-			return false;
-		}
-		P=solver.solve(A.transpose()*b);
-		if(solver.info()!=Success) {
-			// solving failed
-			return false;
-		}
-#endif
-			//将结果赋予控制点 
-			if (out_file.is_open()) 
+		//将结果赋予控制点 
+		if (out_file.is_open()) 
+		{
+			for (int i=0;i<(m+1)*(n+1);i++)
 			{
-				for (int i=0;i<(m+1)*(n+1);i++)
-				{
-					k=i/(n+1);
-					l=i%(n+1);
-					ControlPoint[k][l].x=P(i,0);
-					ControlPoint[k][l].y=P(i,1);
-					ControlPoint[k][l].z=P(i,2);
+				k=i/(n+1);
+				l=i%(n+1);
+				ControlPoint[k][l].x=P(i,0);
+				ControlPoint[k][l].y=P(i,1);
+				ControlPoint[k][l].z=P(i,2);
 
-					out_file <<"控制顶点的坐标依次是："<<ControlPoint[k][l].x<<" "<<ControlPoint[k][l].y<<" "<<ControlPoint[k][l].z<<endl;
+				out_file <<"控制顶点的坐标依次是："<<ControlPoint[k][l].x
+					<<" "<<ControlPoint[k][l].y<<" "<<ControlPoint[k][l].z<<endl;
 
-				}	
-				out_file.close();
-			}
-			cout<<"fitting success!"<<endl;
-			return true;
+			}	
+			out_file.close();
+		}
+		cout<<"fitting success!"<<endl;
+		return true;
 }
 
 
@@ -323,7 +242,7 @@ bool  CBSplineSurfaceView::fitting_bspline( Mesh *mesh)
 	  double u=vt[0];
 	  double v=vt[1];
       p=BSpline(u,v);
-	//  void 	set_point (VertexHandle _vh, const Point &_p)
+	      //  void 	set_point (VertexHandle _vh, const Point &_p)
 		 // Set the coordinate of a vertex. 
       m_pFittedMesh->set_point(*v_it,p.toPoint());
 	}
@@ -331,8 +250,8 @@ bool  CBSplineSurfaceView::fitting_bspline( Mesh *mesh)
 		return true;
 
 }
-//k代表阶数
-double CBSplineSurfaceView::Base(int i,int k,double knot[],int num,double u)//计算B样条基函数
+//k代表阶数,计算B样条基函数
+double CBSplineSurfaceView::Base(int i,int k,double knot[],int num,double u)
 {
 	double  val1=0.;
 	double  val2=0.;
@@ -372,7 +291,7 @@ double CBSplineSurfaceView::Base(int i,int k,double knot[],int num,double u)//计
 
 }
 
-//// 过滤掉小数位》0.0 000 000 0001后的数字,如123.4567，变成123.45（过滤67）
+////过滤掉小数位》0.0 000 000 0001后的数字,如123.4567，变成123.45（过滤67）
 //double CBSplineSurfaceView::filter(double t)
 //{
 //	double f;

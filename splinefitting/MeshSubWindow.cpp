@@ -20,8 +20,8 @@
 MeshSubWindow::MeshSubWindow(void)
 {
 	m_pMeshViewer = new MeshViewer;
-	m_pMeshViewer->setAttribute(Qt::WA_OpaquePaintEvent);
-	m_pMeshViewer->setAttribute(Qt::WA_NoSystemBackground);
+	m_pMeshViewer->setAttribute(Qt::WA_OpaquePaintEvent);  
+	m_pMeshViewer->setAttribute(Qt::WA_NoSystemBackground);//与上面连用，avoid transparent window backgrounds
 	setCentralWidget(m_pMeshViewer);
 	setWindowTitle("Mesh Viewer");
 

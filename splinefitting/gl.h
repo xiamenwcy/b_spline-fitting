@@ -18,7 +18,7 @@
 #define GL_WRAPPERS_HH
 
 #include <stdlib.h>
-#include<gl/glut.h>
+#include <gl/glut.h>
 #include <OpenMesh/Core/Geometry/VectorT.hh>
 //=============================================================================
 namespace GL {

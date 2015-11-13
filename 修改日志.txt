@@ -1,0 +1,3 @@
+11.13  修复Warning: A paint device can only be painted by one painter at a time.
+            办法：在paintevent()里去掉下面的painter->begin(this);因为出现了两次。
+            参考：bool QPainter::begin ( QPaintDevice * device )的说明

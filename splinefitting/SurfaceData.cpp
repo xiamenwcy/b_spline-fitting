@@ -2730,7 +2730,7 @@ void CSurfaceData::modification()
 	sort(uknots.begin(),uknots.end());
 	sort(vknots.begin(),vknots.end());
 }
-bool   CSurfaceData::adjust_knots()
+bool   CSurfaceData::adjust_knots_by_curvature()
 {
 	add_horizon_num=1;
 	add_num=1;
@@ -3563,7 +3563,7 @@ MyMesh CSurfaceData::get_polymesh()
 	return polymesh;
 
 }
-bool CSurfaceData::interection_st( Triangle_2 tri,Segment_2 seg,double *length)
+bool CSurfaceData::intersection_st( Triangle_2 tri,Segment_2 seg,double *length)
 {
 	CGAL::Object result;
 	Point_2 ipoint;
@@ -3931,7 +3931,7 @@ void  CSurfaceData::update_knots(int k)
 									MyMesh::VertexHandle     fv=polymesh.from_vertex_handle(he1),tv=polymesh.to_vertex_handle(he1);
 									MyMesh::Point     p1=polymesh.point(fv),p2=polymesh.point(tv);
 									double length=0;
-									bool is=interection_st(tri,Segment_2(Point_2(p1[0],p1[1]),Point_2(p2[0],p2[1])),&length);
+									bool is=intersection_st(tri,Segment_2(Point_2(p1[0],p1[1]),Point_2(p2[0],p2[1])),&length);
 									if (is)
 									{
 										polymesh.property(e_area,*fe2_it)+=t23*length;
@@ -4135,7 +4135,7 @@ void  CSurfaceData::update_knots(int k)
 									MyMesh::VertexHandle     fv=polymesh.from_vertex_handle(he1),tv=polymesh.to_vertex_handle(he1);
 									MyMesh::Point     p1=polymesh.point(fv),p2=polymesh.point(tv);
 									double length=0;
-									bool is=interection_st(tri,Segment_2(Point_2(p1[0],p1[1]),Point_2(p2[0],p2[1])),&length);
+									bool is=intersection_st(tri,Segment_2(Point_2(p1[0],p1[1]),Point_2(p2[0],p2[1])),&length);
 									if (is)
 									{
 										polymesh.property(e_area,*fe2_it)+=t23*length;
@@ -4615,7 +4615,7 @@ void  CSurfaceData::update_knots2(int k)
 									MyMesh::VertexHandle     fv=polymesh.from_vertex_handle(he1),tv=polymesh.to_vertex_handle(he1);
 									MyMesh::Point     p1=polymesh.point(fv),p2=polymesh.point(tv);
 									double length=0;
-									bool is=interection_st(tri,Segment_2(Point_2(p1[0],p1[1]),Point_2(p2[0],p2[1])),&length);
+									bool is=intersection_st(tri,Segment_2(Point_2(p1[0],p1[1]),Point_2(p2[0],p2[1])),&length);
 									if (is)
 									{
 										polymesh.property(e_area,*fe2_it)+=t23*length;
@@ -4819,7 +4819,7 @@ void  CSurfaceData::update_knots2(int k)
 									MyMesh::VertexHandle     fv=polymesh.from_vertex_handle(he1),tv=polymesh.to_vertex_handle(he1);
 									MyMesh::Point     p1=polymesh.point(fv),p2=polymesh.point(tv);
 									double length=0;
-									bool is=interection_st(tri,Segment_2(Point_2(p1[0],p1[1]),Point_2(p2[0],p2[1])),&length);
+									bool is=intersection_st(tri,Segment_2(Point_2(p1[0],p1[1]),Point_2(p2[0],p2[1])),&length);
 									if (is)
 									{
 										polymesh.property(e_area,*fe2_it)+=t23*length;

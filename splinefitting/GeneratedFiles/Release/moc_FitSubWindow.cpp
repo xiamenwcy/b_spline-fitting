@@ -22,7 +22,7 @@ static const uint qt_meta_data_FitSubWindow[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       8,   14, // methods
+       5,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -35,24 +35,18 @@ static const uint qt_meta_data_FitSubWindow[] = {
  // slots: signature, parameters, type, tag, flags
       32,   29,   13,   13, 0x08,
       62,   59,   13,   13, 0x08,
-      93,   59,   13,   13, 0x08,
-     123,  120,   13,   13, 0x08,
-     147,  144,   13,   13, 0x08,
-     181,  178,   13,   13, 0x08,
-     209,   13,   13,   13, 0x08,
+      86,   83,   13,   13, 0x08,
+     120,  117,   13,   13, 0x08,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_FitSubWindow[] = {
     "FitSubWindow\0\0window_close()\0fv\0"
-    "set_fitted_mesh_view(bool)\0av\0"
-    "set_adjustpoints_enabled(bool)\0"
-    "set_adjusted_enabled(bool)\0ev\0"
+    "set_fitted_mesh_view(bool)\0ev\0"
     "set_error_show(bool)\0mv\0"
     "set_max_error_point_show(bool)\0cv\0"
     "set_controledges_show(bool)\0"
-    "updateStatusBar()\0"
 };
 
 void FitSubWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -63,12 +57,9 @@ void FitSubWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
         switch (_id) {
         case 0: _t->window_close(); break;
         case 1: _t->set_fitted_mesh_view((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 2: _t->set_adjustpoints_enabled((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 3: _t->set_adjusted_enabled((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 4: _t->set_error_show((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 5: _t->set_max_error_point_show((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 6: _t->set_controledges_show((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 7: _t->updateStatusBar(); break;
+        case 2: _t->set_error_show((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 3: _t->set_max_error_point_show((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 4: _t->set_controledges_show((*reinterpret_cast< bool(*)>(_a[1]))); break;
         default: ;
         }
     }
@@ -106,9 +97,9 @@ int FitSubWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 8)
+        if (_id < 5)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 8;
+        _id -= 5;
     }
     return _id;
 }

@@ -85,8 +85,12 @@ bool B_parameter::compute_knots()
 	}
 	return true;
 }
+/*
+  如果迭代成功，绘制的是迭代后的节点线或者是后来增加的节点线，
+  否则，不管是初次初始化还是迭代失败，均绘制初始化的节点线.
+*/
 bool B_parameter::configure_knots()
-{//如果迭代成功，绘制的是迭代后的节点线或者是后来增加的节点线，否则，不管是初次初始化还是迭代失败，均绘制初始化的节点线
+{
   if(iteration_ok)
       return true;
   else

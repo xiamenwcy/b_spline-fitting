@@ -24,7 +24,7 @@
 KnotSubWindow::KnotSubWindow(void)
 {
 
-	knotsViewer = new SplineKnotsViewer();
+	knotsViewer = new KnotsViewer();
 	setCentralWidget(knotsViewer);
 	setWindowTitle("Knots Viewer");
 	surfacedata = NULL;

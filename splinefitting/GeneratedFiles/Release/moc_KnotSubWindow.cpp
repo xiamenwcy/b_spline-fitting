@@ -37,7 +37,7 @@ static const uint qt_meta_data_KnotSubWindow[] = {
       53,   50,   14,   14, 0x0a,
       81,   78,   14,   14, 0x0a,
      104,  101,   14,   14, 0x0a,
-     128,  101,   14,   14, 0x0a,
+     131,  101,   14,   14, 0x0a,
 
        0        // eod
 };
@@ -46,7 +46,7 @@ static const char qt_meta_stringdata_KnotSubWindow[] = {
     "KnotSubWindow\0\0window_close()\0kv\0"
     "knots_view(bool)\0cv\0set_curvature_show(bool)\0"
     "dv\0set_mesh_view(bool)\0ev\0"
-    "error_domain_view(bool)\0"
+    "error_curvature_view(bool)\0"
     "error_fitting_view(bool)\0"
 };
 
@@ -60,7 +60,7 @@ void KnotSubWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
         case 1: _t->knots_view((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 2: _t->set_curvature_show((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 3: _t->set_mesh_view((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 4: _t->error_domain_view((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 4: _t->error_curvature_view((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 5: _t->error_fitting_view((*reinterpret_cast< bool(*)>(_a[1]))); break;
         default: ;
         }

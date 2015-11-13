@@ -545,7 +545,7 @@ void  mainwindow::adjust_knots_by_curvature()
 	if(ret==QMessageBox::No)
 		return;
    surfacedata->set_knots_iteration_times(value1);
-	if(!surfacedata->adjust_knots())
+	if(!surfacedata->adjust_knots_by_curvature())
    {
 	   QMessageBox::critical(this,tr("Knots Updating:"),tr("Knots has NOT been updated yet,please check error."),QMessageBox::Ok);
 	   return;
