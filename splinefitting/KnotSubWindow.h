@@ -28,80 +28,62 @@
 class QAction;
 class QLabel;
 
-
+/** Knot  subwindow class.
+   It's a subwindow of main window.It's used to show  parameterized surface.
+ */
 class KnotSubWindow: public QMainWindow
 {
 	Q_OBJECT
 public:
 	KnotSubWindow(void);
 	~KnotSubWindow(void);
+	/**   清理数据      */
 	void clear_data();
+	/**   更新视图,显示参数化曲面  */
 	void update_view();
+	/**  设置核心数据  */
     void set_surface_data(CSurfaceData *data);
 signals:
 	void window_close();
-	//protected:
-//	void closeEvent(QCloseEvent *event);
+protected:
+	void closeEvent(QCloseEvent *event);
 private:
+	/**  core surface data */
 	CSurfaceData *surfacedata;
+	/** 三维绘图类，是KnotSubWindow的中心区域部件 */
 	SplineKnotsViewer *knotsViewer;
-	B_parameter *parameter;
-	QAction *indexAction;
+	/** 节点线显示菜单选项  */
 	QAction *knotsAction;
+	/** 曲率显示菜单选项   */
 	QAction *curvatureAction;
-	QAction *domainAction;
+	/** 网格显示菜单选项  */
 	QAction *domainmeshAction;
-	QAction *errdomainAction;
-	QAction *densitydomainAction;
-	QAction *centroidAction;
-	QAction *basisAction;
-	QAction *basissumAction;
-	QAction *interiorAction;
-	QAction *delaunayAction;
-	QAction *ddtAction;
-	QAction *principaldirectionAction;
-	QAction *segmentAction;
-	QAction *thinAction;
-	QAction *angleAction;
-	QAction *openAction;
-	QAction *saveAsAction;
-	QAction *triangluationTestAction;
-	QAction *basissupportAction;
-	QAction *triangulationAction;
-	QMenu *fileMenu;
+	/** 曲率积分误差菜单选项 */
+	QAction *curvature_error_Action;
+	/** 拟合误差菜单选项    */
+	QAction *fitting_error_Action;
+	
+    /** 视图显示菜单 */
 	QMenu *viewMenu;
-	QMenu *verificationMenu;
-	QLabel *statusLabel;
-	int basisIndex;
+    /** 创立菜单选项*/
 	void createActions();
+	/** 创立菜单*/
 	void createMenus();
+	/** 创立上下文菜单，也就是右键菜单 */
 	void createContextMenu();
-	void createStatusBar();
-	void updateStatusBar();
 
 public slots:
-		void knots_view(bool kv);
-		void set_curvature_show(bool cv);
-	/*	void centroid_view(bool cv);
-		void basis_view(bool bv);
-		void basis_sum_view(bool sv);
-		void domain_view(bool dv);
-		void basis_index();
-		void interior_knots_view(bool iv);
-		void open();
-		bool saveAs();
-		void show_basis_support(bool bv);
-		void show_triangulation_view(bool tv);
-		void show_delaunay_view(bool dv);
-		void show_ddt_view(bool dv);
-		void show_error_triangles(bool fv);
-		void set_thintriangles_view(bool tv);
-		void set_angletriangles_view(bool av);*/
-		void set_mesh_view(bool dv);
-		void error_domain_view(bool ev);
-		void error_fitting_view(bool ev);
-		/*void density_domain_view(bool dv);
-		void set_principal_direction_view(bool pv);*/
+	 /** 显示节点线 */
+	void knots_view(bool kv);
+	/**  显示曲率   */
+	void set_curvature_show(bool cv);
+	/**  显示网格   */
+	void set_mesh_view(bool dv);
+	/** 显示曲率积分误差 */
+	void error_curvature_view(bool ev);
+	/** 显示拟合误差    */
+	void error_fitting_view(bool ev);
+	
 };
 
 //-------------------------------------------------------

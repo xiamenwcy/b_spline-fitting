@@ -1077,7 +1077,7 @@ void SplineKnotsViewer::set_domain_mesh_view(bool dv)
 	updateGL();
 }
 	
-void SplineKnotsViewer::set_error_domain_view(bool ev)
+void SplineKnotsViewer::set_error_curvature_view(bool ev)
 {
 	berrordomainview = ev;
 	 berror_show=false;

@@ -29,13 +29,17 @@ class QLabel;
 class QAction;
 class QMenu;
 
+/** Mesh  subwindow class.
+   It's a subwindow of main window.It's used to show  mesh surface.
+ */
+
 class MeshSubWindow: public QMainWindow
 {
 	Q_OBJECT
 public:
 	MeshSubWindow(void);
 	~MeshSubWindow(void);
-
+    /** 返回MeshSubWindow的中心区域部件 */
 	MeshViewer *get_mesh_viewer();
 	
 	void set_surface_data(CSurfaceData *data);
@@ -71,7 +75,7 @@ private:
     /**  载入模型三角面片数目 */
 	QLabel *faceLabel;
 
-	/**    三维绘图类  */
+	/**    三维绘图类，是MeshSubWindow的中心区域部件  */
 	MeshViewer *m_pMeshViewer;
     /**  core surface data  */
 	CSurfaceData *surfacedata;

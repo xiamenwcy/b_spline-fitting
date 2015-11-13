@@ -70,7 +70,7 @@ public:
 	//	void set_feature_blocks(bool fv);
 	//	void set_density_threshold();
 	void set_domain_mesh_view(bool dv);
-	void set_error_domain_view(bool ev);
+	void set_error_curvature_view(bool ev);
 	//	void set_density_domain_view(bool ev);
 	//	void set_thintriangles_view(bool tv);
 	//	void set_thintriangles_angle_view(bool av);
