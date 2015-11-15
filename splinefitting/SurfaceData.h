@@ -59,11 +59,12 @@ typedef  CGAL::Triangle_2<Kernel>                         Triangle_2;
 typedef  CGAL::Iso_rectangle_2<Kernel>                    Iso_rectangle_2;
 typedef CGAL::Polygon_2<Kernel>                           Polygon_2;
 typedef CGAL::Bbox_2                                      Bbox_2;
-typedef CGAL::Bbox_3                                      Bbox_3;
+/** Bbox_3(double x_min, double y_min, double z_min, double x_max, double y_max, double z_max) */																	
+typedef CGAL::Bbox_3                                      Bbox_3; 
 
-class CSurfaceData :public  QObject
+class CSurfaceData //:public  QObject
 {
-	Q_OBJECT
+	//Q_OBJECT
 public:
 	CSurfaceData(void);
 	~CSurfaceData(void);
@@ -75,6 +76,7 @@ public:
 	QString get_mesh_name();
 	Mesh *get_original_mesh();
 
+    void   clear_data();                   /**<  清理数据  */
 	void setparameter(B_parameter *parameter_2);
 
 	//增加节点线
@@ -178,12 +180,10 @@ public:
 	void update_polymesh();
 	MyMesh get_polymesh();
 
-signals:
-	void mesh_changed();
 private:
 
-	Mesh *m_pOriginalMesh;
-	int iter_times;
+	Mesh *m_pOriginalMesh;     /**<  读入的原始网格  */
+	int iter_times;            /**<  按照曲率调整节点线的迭代次数 */
 	int add_num;               /**< 每次应该增加的竖直节点线数，由用户指定 */
     int add_horizon_num;       /**< 每次应该增加的水平节点线数，由用户指定 */
     B_parameter *parameter1;
@@ -193,9 +193,9 @@ private:
 	Mesh *m_pErrorMesh;
 	MyMesh polymesh;
 
-	QString fileName;
+	QString fileName;            /**< 读入的文件名 */
 
-	vector<TexCoord> domain;
+	vector<TexCoord> domain;      /**< 所有网格点的纹理坐标 */
    
 
 	Bbox_2 box;
@@ -206,13 +206,13 @@ private:
 	int sample_num;
 
 	double err_threshold;
-    Max_Error max_err;     /** 可修改的最大误差*/
-	double   max_err_real; /** 真实的未修改的最大误差*/
+    Max_Error max_err;      /**< 可修改的最大误差 */
+	double   max_err_real;  /**< 真实的未修改的最大误差 */
 	double max_meancurvature;
 	double min_meancurvature;
 	double max_curerror;
 	double min_curerror;
-	double mean_err;       /** 均方根误差*/
+	double mean_err;        /**< 均方根误差 */
 	double mean_e;
      bool   Curvature_loading;
 	 bool   fitting_completed_;

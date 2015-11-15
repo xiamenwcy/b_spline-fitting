@@ -15,7 +15,9 @@
 */
 
 //Openmesh
-#include <OpenMesh/Core/IO/MeshIO.hh>//必须放在首行?
+/** To use the IO facility of OpenMesh make sure that the include MeshIO.hh is included first.*/
+#include <OpenMesh/Core/IO/MeshIO.hh>
+#include <OpenMesh/Tools/Utils/getopt.h>
 
 //Qt
 #include <QtGui/QtGui>
@@ -49,7 +51,7 @@
 
 
 
-#define _READ_ 1
+#define _READ_ 1 //没什么作用，弃用
 typedef  vector<int> vecint;
 typedef  vector<vector< OpenMesh::Vec3d> > vectex;
 typedef vector<double>::iterator   viterator;
@@ -63,20 +65,16 @@ vector<double>  error_sum;//每一次迭代的误差和
 int CSurfaceData::iter_num=1;
 
 
-const int inside = -1;
-const int boundary =0;
-const int outside =1;
-const int unknown = 3;
-
 CSurfaceData::CSurfaceData(void)
 {
-	m_pOriginalMesh = NULL;
-    parameter1=new B_parameter(0,0,0,0);
+	m_pOriginalMesh = NULL; /**< 必须设为NULL，\see MeshViewer::draw(), MeshViewer::draw_original_mesh()*/
+    parameter1=new(std::nothrow) B_parameter(0,0,0,0);
 	m_pFittedMesh = NULL;
+	m_pErrorMesh = NULL;
 	bsurface=NULL;
 	//error = NULL;
 	sample_num = 0;
-	m_pErrorMesh = NULL;
+
 	err_threshold = 1;
 	Curvature_loading=false;
 	fitting_completed_=false;
@@ -92,10 +90,11 @@ CSurfaceData::CSurfaceData(void)
 
 CSurfaceData::~CSurfaceData(void)
 {
-	/*clear_data();*/
+	 clear_data();
 	 delete kdTree;
 	 kdTree=NULL;
 	 annClose();	
+
 		
 }
 void CSurfaceData::setparameter(B_parameter *parameter_2)
@@ -153,10 +152,10 @@ void CSurfaceData::range_query()
 			OpenMesh::FPropHandleT<vecint> v_index;  //增加每个面的内部点和边界点序号属性
 			polymesh.add_property(v_index,"v_index");
 
-			OpenMesh::VPropHandleT<int> v_location; //添加点属性
+			OpenMesh::VPropHandleT<Location_Type> v_location; //添加点属性
 			m_pOriginalMesh->get_property_handle(v_location,"v_location");
 
-			OpenMesh::FPropHandleT<int> f_location; //添加面属性
+			OpenMesh::FPropHandleT<Location_Type> f_location; //添加面属性
 			m_pOriginalMesh->get_property_handle(f_location,"f_location");
 
 			//先对每个面对积分
@@ -178,8 +177,8 @@ void CSurfaceData::range_query()
 				ANNdistArray		dists;					// near neighbor distances
 				double			     eps= 0.00001;			// error bound
 				queryPt = annAllocPt(2);					// allocate query point
-				nnIdx = new ANNidx[1];						// allocate near neigh indices
-				dists = new ANNdist[1];						// allocate near neighbor dists
+				nnIdx = new(std::nothrow) ANNidx[1];						// allocate near neigh indices
+				dists = new(std::nothrow) ANNdist[1];						// allocate near neighbor dists
 
 				queryPt[0]=(uknots_min+uknots_max)/2;
 				queryPt[1]=(vknots_min+vknots_max)/2;
@@ -658,10 +657,10 @@ void CSurfaceData::range_query2()
 			OpenMesh::FPropHandleT<vecint> v_index;  //增加每个面的内部点和边界点序号属性
 			polymesh.add_property(v_index,"v_index");
 
-			OpenMesh::VPropHandleT<int> v_location; //添加点属性
+			OpenMesh::VPropHandleT<Location_Type> v_location; //添加点属性
 			m_pOriginalMesh->get_property_handle(v_location,"v_location");
 
-			OpenMesh::FPropHandleT<int> f_location; //添加面属性
+			OpenMesh::FPropHandleT<Location_Type> f_location; //添加面属性
 			m_pOriginalMesh->get_property_handle(f_location,"f_location");
 
 			//先对每个面对积分
@@ -683,8 +682,8 @@ void CSurfaceData::range_query2()
 				ANNdistArray		dists;					// near neighbor distances
 				double			     eps= 0.00001;			// error bound
 				queryPt = annAllocPt(2);					// allocate query point
-				nnIdx = new ANNidx[1];						// allocate near neigh indices
-				dists = new ANNdist[1];						// allocate near neighbor dists
+				nnIdx = new(std::nothrow) ANNidx[1];						// allocate near neigh indices
+				dists = new(std::nothrow) ANNdist[1];						// allocate near neighbor dists
 
 				queryPt[0]=(uknots_min+uknots_max)/2;
 				queryPt[1]=(vknots_min+vknots_max)/2;
@@ -1167,10 +1166,10 @@ void CSurfaceData::range_query2()
 			OpenMesh::FPropHandleT<vecint> v_index;  //增加每个面的内部点和边界点序号属性
 			polymesh.add_property(v_index,"v_index");
 
-			OpenMesh::VPropHandleT<int> v_location; //添加点属性
+			OpenMesh::VPropHandleT<Location_Type> v_location; //添加点属性
 			m_pOriginalMesh->add_property(v_location,"v_location");
 
-			OpenMesh::FPropHandleT<int> f_location; //添加面属性
+			OpenMesh::FPropHandleT<Location_Type> f_location; //添加面属性
 			m_pOriginalMesh->add_property(f_location,"f_location");
 
 			//先对每个面对积分
@@ -2099,131 +2098,45 @@ B_parameter* CSurfaceData::getparameter()
 	return parameter1;
 }
 
-//void CSurfaceData::clear_data()
-//{
-//	if(m_pOriginalMesh!=NULL)
-//	{
-//		delete m_pOriginalMesh;
-//		m_pOriginalMesh = NULL;
-//	}
-//	if(m_pSimplifiedMesh!=NULL)
-//	{
-//		delete m_pSimplifiedMesh;
-//		m_pSimplifiedMesh = NULL;
-//	}
-//	if(m_pFittedMesh!=NULL)
-//	{
-//		delete m_pFittedMesh;
-//		m_pFittedMesh = NULL;
-//	}
-//
-//	if(m_pDensityMesh!=NULL)
-//	{
-//		delete m_pDensityMesh;
-//		m_pDensityMesh = NULL;
-//	}
-//	
-//	if(m_pDomainMesh!=NULL)
-//	{
-//		delete m_pDomainMesh;
-//		m_pDomainMesh = NULL;
-//	}
-//	if(m_pControlMesh != NULL)
-//	{
-//		delete m_pControlMesh;
-//		m_pControlMesh = NULL;
-//	}
-//	if(m_pAdjustedMesh!=NULL)
-//	{
-//		delete m_pAdjustedMesh;
-//		m_pAdjustedMesh = NULL;
-//	}
-//	if(m_pBasisMesh!=NULL)
-//	{
-//		delete m_pBasisMesh;
-//		m_pBasisMesh = NULL;
-//	}
-//	if(!m_pBasissumMesh)
-//	{
-//		delete m_pBasissumMesh;
-//		m_pBasissumMesh = NULL;
-//	}
-//	if(!m_pErrorMesh)
-//	{
-//		delete m_pErrorMesh;
-//		m_pErrorMesh = NULL;
-//	}
-//	pos_added_indices.clear();
-//	knots.clear();
-//	centroid.clear();
-//	if(domain!=NULL)
-//	{
-//		delete []domain;
-//		domain = NULL;
-//	}
-//	if(domain_z != NULL)
-//	{
-//		delete []domain_z;
-//		domain_z = NULL;
-//	}
-//	if(error!=NULL)
-//	{
-//		delete []error;
-//		error = NULL;
-//	}
-//	
-//	if(adjusted_control_vertices!=NULL)
-//	{
-//		delete []adjusted_control_vertices;
-//		adjusted_control_vertices = NULL;
-//	}
-//
-//	if(controlvertices_color!=NULL)
-//	{
-//		int sz = cdt_knotstri.get_basis_size();
-//		for(int i=0; i<sz; i++)
-//		{
-//			delete []controlvertices_color[i];
-//		}
-//		delete []controlvertices_color;
-//		controlvertices_color = NULL;
-//	}
-//	basis_index = -1;
-//	nCol = 0;
-//	nRow = 0;
-//	sample_num = 0;
-//	nseed = 0;
-//	nknots = 0;
-	//fileName.clear();
-//	
-//	isBoundary = true;
-//	err_threshold = 1;
-//	bmaxdens_changed = true;
-//	bmaxerr_changed = true;
-//	cdt_knotstri.clear_data();
-//	boutput = true;
-//	iter_num = 0;
-//	emit mesh_changed();
-//	simplified_time = 0;
-//	fitting_time = 0;
-//}
+void CSurfaceData::clear_data()
+{
+	if(m_pOriginalMesh!=NULL)
+	{
+		delete m_pOriginalMesh;
+		m_pOriginalMesh = NULL;
+	}
+	if(m_pFittedMesh!=NULL)
+	{
+		delete m_pFittedMesh;
+		m_pFittedMesh = NULL;
+	}
+	if(m_pErrorMesh!=NULL)
+	{
+		delete m_pErrorMesh;
+		m_pErrorMesh = NULL;
+	}
+    if (parameter1!=NULL)
+    {
+        delete parameter1;
+		parameter1=NULL;
+    }
+	if(bsurface!=NULL)
+	{
+		delete bsurface;
+		bsurface=NULL;
+	}
+	fileName.clear();
+	err_threshold = 1;
+	iter_num = 0;
+
+}
 
 bool CSurfaceData::read_mesh(const QString &name)
 {
 	fileName = name;
 	if(m_pOriginalMesh == NULL)
 	{
-		m_pOriginalMesh = new Mesh;
-	}
-	else
-	{
-		m_pOriginalMesh->clear();//Reset the whole mesh.This will remove all elements from the mesh but keeps the properties
-
-	}
-	if(fileName.isEmpty())
-	{ 
-		QMessageBox::information(NULL, tr("Path"), tr("You didn't select any files.")); 
-		return false;
+		m_pOriginalMesh = new(std::nothrow) Mesh;
 	}
     m_pOriginalMesh->request_vertex_texcoords2D();
 	m_pOriginalMesh->request_face_normals();
@@ -2231,6 +2144,7 @@ bool CSurfaceData::read_mesh(const QString &name)
 	OpenMesh::IO::Options opt;
 	opt+=OpenMesh::IO::Options::VertexTexCoord;
 	opt+=OpenMesh::IO::Options::VertexNormal;
+	// Returns a substring that contains the n rightmost characters of the string.
 	QString extension = fileName.right(4);
 	if(extension == ".off")
 	{
@@ -2296,8 +2210,7 @@ bool CSurfaceData::mesh_parameterization()
 {
 	if(domain.empty())
 	{
-		
-		//如果空的话，需要根据原始网格计算domain，这里先不计算domain,所以我们的网格一定要带有参数化坐标
+		return false;//如果空的话，需要根据原始网格计算domain，这里先不计算domain,所以我们的网格一定要带有参数化坐标
 	}
 	compute_box();
 
@@ -2350,7 +2263,7 @@ bool CSurfaceData::mesh_fitting()
 {
 	if (m_pOriginalMesh==NULL||parameter1==NULL||!parameter1->configure_knots())
 	return false;
-    bsurface=new CBSplineSurfaceView;
+    bsurface=new(std::nothrow) CBSplineSurfaceView;
 	bsurface->setBparameter(parameter1);
 	 bool p=bsurface->fitting_bspline(m_pOriginalMesh);
 	 m_pFittedMesh=NULL;
@@ -2385,17 +2298,7 @@ bool CSurfaceData::compute_curvature(QStringList files)
 	m_pOriginalMesh->property(f_mean_curvature).set_persistent(true);
 
 	if (files.size()!=2)
-		return false;
-	QStringList::Iterator it = files.begin();
-#if 0	   
-	QFile file1(*it); 
-	if (!file1.open(QFile::ReadOnly | QFile::Text))
-		return false;
-	++it;
-	QFile file2(*it); 
-	if (!file2.open(QFile::ReadOnly |  QFile::Text))
-		return false;
-#endif		
+		return false;	
 
 	QFile file1(files.takeFirst()); //takeFirst去掉第一项并返回被去掉的项
 	if (!file1.open(QFile::ReadOnly | QFile::Text))
@@ -2734,8 +2637,13 @@ bool   CSurfaceData::adjust_knots_by_curvature()
 {
 	add_horizon_num=1;
 	add_num=1;
+
 	if (m_pOriginalMesh==NULL||parameter1==NULL)
 		return false;
+
+	uknots=parameter1->getuknot();
+	vknots=parameter1->getvknot();
+
 	if (uknots.empty()||vknots.empty())
 	{
 		if (!parameter1->compute_knots())
@@ -2744,11 +2652,25 @@ bool   CSurfaceData::adjust_knots_by_curvature()
 		}
 		 uknots=parameter1->getuknot();
 		 vknots=parameter1->getvknot();
-		 unum=parameter1->getnum_u();
-		 vnum=parameter1->getnum_v();
 	 }
+
+	/************************************************************************/
+	/* bool OpenMesh::BaseKernel::get_property_handle(VPropHandleT< T > & _ph,const std::string & _name )	const 
+	
+	/* Retrieves(找回) the handle to a named property by it's name.
+
+	/* Parameters:
+	_ph	A property handle. On success the handle is valid else invalid.
+	_name	Name of wanted property.
+	Returns
+	true if such a named property is available, else false.
+	
+	*/
+	/************************************************************************/
 	 OpenMesh::FPropHandleT<double> f2_mean_curvature;
-	 m_pOriginalMesh->get_property_handle(f2_mean_curvature,"f_mean_curvature"); 
+	bool p_result=m_pOriginalMesh->get_property_handle(f2_mean_curvature,"f_mean_curvature"); //p_result指明了f2_mean_curvature是否有效
+
+
 	 //计时开始
 	 _LARGE_INTEGER time_start;    /*开始时间*/
 	 _LARGE_INTEGER time_over;        /*结束时间*/
@@ -2757,6 +2679,7 @@ bool   CSurfaceData::adjust_knots_by_curvature()
 	 QueryPerformanceFrequency(&f);
 	 dqFreq=(double)f.QuadPart;
 	 QueryPerformanceCounter(&time_start);
+
 	
 	//求解平均曲率积分总和
      double sum=0.0;
@@ -2778,7 +2701,9 @@ bool   CSurfaceData::adjust_knots_by_curvature()
 	  double  fa=sum/num3;
 	  curaverage_=fa;
 	  cout<<"平均曲率积分为:"<<curaverage_<<endl;
-	  //建立kd-tree
+
+//-------------------------------------------------------------------- kd-tree
+
 	  int					nPts;					// actual number of data points
 	  ANNpointArray		dataPts;				// data points
 	  int				maxPts= m_pOriginalMesh->n_vertices();			// maximum number of data points 				
@@ -2792,15 +2717,17 @@ bool   CSurfaceData::adjust_knots_by_curvature()
 		  dataPts[nPts][1]=m_pOriginalMesh->texcoord2D(*v_it)[1];
 		  assert(nPts==(*v_it).idx());
 	  }
-	  kdTree = new ANNkd_tree(					// build search structure
+	  kdTree = new(std::nothrow) ANNkd_tree(					// build search structure
 		  dataPts,					// the data points
 		  nPts,						// number of points
 		  2);						// dimension of space
+//-------------------------------------------------------------------- kd-tree
+
 	  //增加原始曲面的两个属性
-	  OpenMesh::VPropHandleT<int> v_location; //添加点属性
+	  OpenMesh::VPropHandleT<Location_Type> v_location; //添加点属性
 	  m_pOriginalMesh->add_property(v_location,"v_location");
 
-	  OpenMesh::FPropHandleT<int> f_location; //添加面属性
+	  OpenMesh::FPropHandleT<Location_Type> f_location; //添加面属性
 	  m_pOriginalMesh->add_property(f_location,"f_location");
 
 	  for (v_it=m_pOriginalMesh->vertices_begin();v_it!=v_end;++v_it)
@@ -2812,7 +2739,9 @@ bool   CSurfaceData::adjust_knots_by_curvature()
 	  {
 		  m_pOriginalMesh->property(f_location,*f_it)=unknown;
 	  }
-	  //迭代
+
+//-------------------------------------------------------------------- 迭代
+
 	  int  i=0;
 	  while(i<iter_times)
 	  {
@@ -2932,10 +2861,10 @@ bool CSurfaceData::adjust_knots_by_fitting_error()
 	erroraverage_=fa;
 	cout<<"平均误差积分为:"<<erroraverage_<<endl;
 	//增加原始曲面的两个属性
-	OpenMesh::VPropHandleT<int> v_location; //添加点属性
+	OpenMesh::VPropHandleT<Location_Type> v_location; //添加点属性
 	m_pFittedMesh->add_property(v_location,"v_location_fit");
 
-	OpenMesh::FPropHandleT<int> f_location; //添加面属性
+	OpenMesh::FPropHandleT<Location_Type> f_location; //添加面属性
 	m_pFittedMesh->add_property(f_location,"f_location_fit");
 
 	 Mesh::VertexIter     v_it,v_end(m_pFittedMesh->vertices_end());
@@ -3089,10 +3018,10 @@ void CSurfaceData::update_polymesh()
 			OpenMesh::FPropHandleT<double> f_error;  //增加每个面的曲率误差属性
 			polymesh.add_property(f_error,"f_error");
 
-			OpenMesh::VPropHandleT<int> v_location; //添加点属性
+			OpenMesh::VPropHandleT<Location_Type> v_location; //添加点属性
 			m_pOriginalMesh->get_property_handle(v_location,"v_location");
 
-			OpenMesh::FPropHandleT<int> f_location; //添加面属性
+			OpenMesh::FPropHandleT<Location_Type> f_location; //添加面属性
 			m_pOriginalMesh->get_property_handle(f_location,"f_location");
 
 
@@ -3123,8 +3052,8 @@ void CSurfaceData::update_polymesh()
 				ANNdistArray		dists;					// near neighbor distances
 				double			     eps= 0.00001;			// error bound
 				queryPt = annAllocPt(2);					// allocate query point
-				nnIdx = new ANNidx[1];						// allocate near neigh indices
-				dists = new ANNdist[1];						// allocate near neighbor dists
+				nnIdx = new(std::nothrow) ANNidx[1];						// allocate near neigh indices
+				dists = new(std::nothrow) ANNdist[1];						// allocate near neighbor dists
 
 				queryPt[0]=(uknots_min+uknots_max)/2;
 				queryPt[1]=(vknots_min+vknots_max)/2;
@@ -3619,10 +3548,14 @@ bool  CSurfaceData::intersection_rt(Triangle_2 tri,Iso_rectangle_2 rec,double *A
 
 void  CSurfaceData::update_knots(int k)
 {
+//--------------------------------------------------------------------begin build polymesh
+
 	sort(uknots.begin(),uknots.end());
 	sort(vknots.begin(),vknots.end());
+
 	//update_polymesh
 	polymesh.clear();
+
 	// generate vertices
 	vector<vector<MyMesh::VertexHandle> > vhandle;
 	vhandle.resize(vnum,vector<MyMesh::VertexHandle>(unum));
@@ -3632,20 +3565,21 @@ void  CSurfaceData::update_knots(int k)
 			vhandle[j][i]=polymesh.add_vertex(MyMesh::Point(uknots[i],vknots[j],0.0));
 		}
 
-		// generate (quadrilateral) faces
-		std::vector<MyMesh::VertexHandle>  face_vhandles;
-		for(int j=0;j<vnum-1;j++)
-			for (int i=0;i<unum-1;i++)
-			{
-				face_vhandles.clear();
-				face_vhandles.push_back(vhandle[j][i]);
-				face_vhandles.push_back(vhandle[j][i+1]);
-				face_vhandles.push_back(vhandle[j+1][i+1]);
-				face_vhandles.push_back(vhandle[j+1][i]);
-				polymesh.add_face(face_vhandles);
+	// generate (quadrilateral) faces
+	std::vector<MyMesh::VertexHandle>  face_vhandles;
+	for(int j=0;j<vnum-1;j++)
+		for (int i=0;i<unum-1;i++)
+		{
+			face_vhandles.clear();
+			face_vhandles.push_back(vhandle[j][i]);
+			face_vhandles.push_back(vhandle[j][i+1]);
+			face_vhandles.push_back(vhandle[j+1][i+1]);
+			face_vhandles.push_back(vhandle[j+1][i]);
+			polymesh.add_face(face_vhandles);
 
-			}
-			//至此矩形面建立完毕
+		}
+	 //至此矩形面建立完毕
+//--------------------------------------------------------------------  end 
 			Mesh::FaceIter  f_it,f_end(m_pOriginalMesh->faces_end());
 			Mesh::FaceVertexIter fv_it2;
 
@@ -3655,10 +3589,10 @@ void  CSurfaceData::update_knots(int k)
 			OpenMesh::EPropHandleT<double> e_area;  //增加每条边的曲率积分属性
 			polymesh.add_property(e_area,"e_area");
 
-			OpenMesh::VPropHandleT<int> v_location; //添加点属性
+			OpenMesh::VPropHandleT<Location_Type> v_location; //添加点属性
 			m_pOriginalMesh->get_property_handle(v_location,"v_location");
 
-			OpenMesh::FPropHandleT<int> f_location; //添加面属性
+			OpenMesh::FPropHandleT<Location_Type> f_location; //添加面属性
 			m_pOriginalMesh->get_property_handle(f_location,"f_location");
 
 
@@ -3675,7 +3609,8 @@ void  CSurfaceData::update_knots(int k)
 			OpenMesh::FPropHandleT<double> f_mean_curvature2;
 			m_pOriginalMesh->get_property_handle(f_mean_curvature2,"f_mean_curvature");
 
-			//先对每个面对积分
+
+//-------------------------------------------------------------  先对每个面对积分
 			MyMesh::FaceIter f2_it,f2_end(polymesh.faces_end());  
 			MyMesh::FaceVertexIter  fv2_it;
 			for (f2_it=polymesh.faces_begin();f2_it!=f2_end;++f2_it)
@@ -3694,8 +3629,8 @@ void  CSurfaceData::update_knots(int k)
 				ANNdistArray		dists;					// near neighbor distances
 				double			     eps= 0.00001;			// error bound
 				queryPt = annAllocPt(2);					// allocate query point
-				nnIdx = new ANNidx[1];						// allocate near neigh indices
-				dists = new ANNdist[1];						// allocate near neighbor dists
+				nnIdx = new(std::nothrow) ANNidx[1];						// allocate near neigh indices
+				dists = new(std::nothrow) ANNdist[1];						// allocate near neighbor dists
 
 				queryPt[0]=(uknots_min+uknots_max)/2;
 				queryPt[1]=(vknots_min+vknots_max)/2;
@@ -4341,10 +4276,10 @@ void  CSurfaceData::update_knots2(int k)
 			OpenMesh::EPropHandleT<double> e_area;  //增加每条边的曲率积分属性
 			polymesh.add_property(e_area,"e_area");
 
-			OpenMesh::VPropHandleT<int> v_location; //添加点属性
+			OpenMesh::VPropHandleT<Location_Type> v_location; //添加点属性
 			m_pFittedMesh->get_property_handle(v_location,"v_location_fit");
 
-			OpenMesh::FPropHandleT<int> f_location; //添加面属性
+			OpenMesh::FPropHandleT<Location_Type> f_location; //添加面属性
 			m_pFittedMesh->get_property_handle(f_location,"f_location_fit");
 
 
@@ -4380,8 +4315,8 @@ void  CSurfaceData::update_knots2(int k)
 				ANNdistArray		dists;					// near neighbor distances
 				double			     eps= 0.00001;			// error bound
 				queryPt = annAllocPt(2);					// allocate query point
-				nnIdx = new ANNidx[1];						// allocate near neigh indices
-				dists = new ANNdist[1];						// allocate near neighbor dists
+				nnIdx = new(std::nothrow) ANNidx[1];						// allocate near neigh indices
+				dists = new(std::nothrow) ANNdist[1];						// allocate near neighbor dists
 
 				queryPt[0]=(uknots_min+uknots_max)/2;
 				queryPt[1]=(vknots_min+vknots_max)/2;
@@ -5017,7 +4952,7 @@ void CSurfaceData::set_max_error(double &err)
 		{
 			if(!m_pErrorMesh)
 			{
-				m_pErrorMesh = new Mesh;
+				m_pErrorMesh = new(std::nothrow) Mesh;
 				*m_pErrorMesh = *m_pFittedMesh;
 			}
 			else

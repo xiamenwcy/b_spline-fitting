@@ -36,10 +36,6 @@ MeshViewer::MeshViewer()
 
 	bcurvature_show = false;
 
-	badjustedmesh_show = false;
-	
-	  badjust = false;
-
 	setAutoBufferSwap( false );
 	setAutoFillBackground( false );
 	setMouseTracking(true);
@@ -57,8 +53,7 @@ void MeshViewer::clear_data()
 	borigina_mesh_view = true;
 
 	bcurvature_show = false;
-	
-	badjustedmesh_show = false;
+
 	
 	bBox = Bbox_3(-1, 1, -1, 1, -1, 1);
 	
@@ -281,26 +276,6 @@ void MeshViewer::update_view()
 void MeshViewer::set_origin_mesh_view(bool ov)
 {
 	borigina_mesh_view = ov;
-//#if 0
-//	Polyhedron *mesh = surfacedata->get_original_mesh();
-//	if (!mesh)
-//		return;
-//	
-//	if (borigina_mesh_view && originalMeshVertices.empty())
-//	{
-//		Polyhedron::Facet_iterator fit = mesh->facets_begin();
-//		for (; fit!=mesh->facets_end(); fit++)
-//		{
-//			Polyhedron::Halfedge_around_facet_circulator hc = fit->facet_begin(), hs = hc;
-//			do 
-//			{
-//				originalMeshVertices.push_back(QVector3D(hc->vertex()->point().x(), hc->vertex()->point().y(), hc->vertex()->point().z()));
-//				originalMeshNormals.push_back(QVector3D(hc->vertex()->normal().x(), hc->vertex()->normal().y(), hc->vertex()->normal().z()));
-//			} while (++hc!=hs);
-//			
-//		}
-//	}
-//#endif
 	updateGL();
 }
 
@@ -322,11 +297,7 @@ void MeshViewer::set_curvature_show(bool cv)
 }
 
 
-void MeshViewer::set_adjustedmesh_enabled(bool av)
-{
-	badjustedmesh_show = av;
-	updateGL();
-}
+
 
 void MeshViewer::paintEvent(QPaintEvent *event)
 {
@@ -336,6 +307,7 @@ void MeshViewer::paintEvent(QPaintEvent *event)
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	//// Save current OpenGL state,
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glMatrixMode(GL_MODELVIEW);
@@ -425,163 +397,6 @@ void MeshViewer::draw_curvature_colorbar(QPainter *painter)
 	painter->restore();
 }
 
-
-
-//void MeshViewer::mousePressEvent(QMouseEvent *event)
-//{
-//	if(badjust&&badjusted_control_mesh)
-//	{
-//		GLdouble mvmatrix[16], projmatrix[16];
-//		GLfloat  winX, winY; 
-//		GLdouble posX, posY, posZ;
-//		GLint    viewport[4]; 
-//
-//		glPushMatrix();
-//		/*Bbox_3 box = surfacedata->get_original_mesh()->bbox().bbox();
-//		set_scene(box);*/
-//		glPolygonOffset(3.0f, 1.0f);
-//
-//		glGetIntegerv(GL_VIEWPORT, viewport);
-//		glGetDoublev(GL_MODELVIEW_MATRIX, mvmatrix);
-//		glGetDoublev(GL_PROJECTION_MATRIX, projmatrix);
-//
-//		glPopMatrix();
-//
-//		double dist = 3.5*radius/viewport[3];
-//		
-//		QPoint lastPos = event->pos();
-//		GLint x = lastPos.x();
-//		GLint y = lastPos.y();
-//
-//		winX = (float)x;
-//		winY = viewport[3] - (GLint)y;
-//
-//		glReadPixels((int)winX, (int)winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
-//		
-//		gluUnProject(winX, winY, winZ, mvmatrix, projmatrix, viewport, &posX, &posY, &posZ);
-//		
-//		
-//		pos = Point_3(posX, posY, posZ);
-//		index =  check_selected(pos, dist);
-//		emit position_changed();
-//		if(index!=-1)
-//		{
-//			double **controlvertices_colors = surfacedata->get_controlvertices_color();
-//			controlvertices_colors[index][0] = 1.0;
-//			controlvertices_colors[index][1] = 1.0;
-//			controlvertices_colors[index][2] = 0.0;
-//			updateGL();
-//		}
-//	}
-//	else
-//	{
-//		GLdouble mvmatrix[16], projmatrix[16];
-//		GLfloat  winX, winY;
-//		GLdouble posX, posY, posZ;
-//		GLint    viewport[4]; 
-//
-//		glPushMatrix();
-//		
-//		glPolygonOffset(3.0f, 1.0f);
-//		glGetIntegerv(GL_VIEWPORT, viewport);
-//		glGetDoublev(GL_MODELVIEW_MATRIX, mvmatrix);
-//		glGetDoublev(GL_PROJECTION_MATRIX, projmatrix);
-//		glPopMatrix();
-//
-//		QPoint lastPos = event->pos();
-//		GLint x = lastPos.x();
-//		GLint y = lastPos.y();
-//
-//		winX = (float)x;
-//		winY = viewport[3] - (GLint)y;
-//		
-//		gluUnProject(winX, winY, winZ, mvmatrix, projmatrix, viewport, &posX, &posY, &posZ);
-//		pos = Point_3(posX, posY, posZ);
-//		emit position_changed();
-//		QGLViewer::mousePressEvent(event);
-//	}
-//}
-//
-//void MeshViewer::mouseMoveEvent(QMouseEvent *event)
-//{
-//	if(badjust&&badjusted_control_mesh)
-//	{
-//		if(index==-1)
-//			return;
-//		GLdouble mvmatrix[16], projmatrix[16];
-//		GLfloat  winX, winY;
-//		GLdouble posX, posY, posZ;
-//		GLint    viewport[4]; 
-//
-//		glPushMatrix();
-//		/*Bbox_3 box = surfacedata->get_original_mesh()->bbox().bbox();
-//		set_scene(box);*/
-//		glPolygonOffset(3.0f, 1.0f);
-//		glGetIntegerv(GL_VIEWPORT, viewport);
-//		glGetDoublev(GL_MODELVIEW_MATRIX, mvmatrix);
-//		glGetDoublev(GL_PROJECTION_MATRIX, projmatrix);
-//		glPopMatrix();
-//
-//		QPoint lastPos = event->pos();
-//		GLint x = lastPos.x();
-//		GLint y = lastPos.y();
-//
-//		winX = (float)x;
-//		winY = viewport[3] - (GLint)y;
-//		
-//		gluUnProject(winX, winY, winZ, mvmatrix, projmatrix, viewport, &posX, &posY, &posZ);
-//		pos = Point_3(posX, posY, posZ);
-//		surfacedata->update_mesh(index, pos);
-//		emit position_changed();
-//		updateGL();
-//	}
-//	else
-//	{
-//		GLdouble mvmatrix[16], projmatrix[16];
-//		GLfloat  winX, winY;
-//		GLdouble posX, posY, posZ;
-//		GLint    viewport[4]; 
-//
-//		glPushMatrix();
-//		
-//		glPolygonOffset(3.0f, 1.0f);
-//		glGetIntegerv(GL_VIEWPORT, viewport);
-//		glGetDoublev(GL_MODELVIEW_MATRIX, mvmatrix);
-//		glGetDoublev(GL_PROJECTION_MATRIX, projmatrix);
-//		glPopMatrix();
-//
-//		QPoint lastPos = event->pos();
-//		GLint x = lastPos.x();
-//		GLint y = lastPos.y();
-//
-//		winX = (float)x;
-//		winY = viewport[3] - (GLint)y;
-//		
-//		gluUnProject(winX, winY, winZ, mvmatrix, projmatrix, viewport, &posX, &posY, &posZ);
-//		pos = Point_3(posX, posY, posZ);
-//		emit position_changed();
-//		QGLViewer::mouseMoveEvent(event);
-//	}
-//}
-//
-//void MeshViewer::mouseReleaseEvent(QMouseEvent *event)
-//{
-//	if(index!=-1)
-//		{
-//			double **controlvertices_colors = surfacedata->get_controlvertices_color();
-//			controlvertices_colors[index][0] = 0.0;
-//			controlvertices_colors[index][1] = 0.0;
-//			controlvertices_colors[index][2] = 1.0;
-//			updateGL();
-//		}
-//	QGLViewer::mouseReleaseEvent(event);
-//}
-//
-void MeshViewer::set_adjustpoints_enabled(bool av)
-{
-	badjust = av;
-	updateGL();
-}
 
 bool MeshViewer::write_mesh(QString &fileName, Mesh_Type type)
 {

@@ -24,6 +24,7 @@
    参考：D:\Program Files (x86)\OpenMesh-3.2\include\OpenMesh\Core\IO\MeshIO.hh
 */
 /************************************************************************/
+/** To use the IO facility of OpenMesh make sure that the include MeshIO.hh is included first.*/
 #include <OpenMesh/Core/IO/MeshIO.hh>
 #include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
 
@@ -47,9 +48,12 @@ typedef CGAL::Bbox_3  Bbox_3;
 class QPaintEvent;
 class QPainter;
 
+/** FitSubWindow central widget.
+    It support OpenGL,include 2D drawing and 3D drawing.
+*/
 class FittingMeshViewer:public QGLViewer
 {
-	Q_OBJECT        //只有定义了这个才能使用信号-槽机制
+	Q_OBJECT           /** \note 只有定义了这个才能使用信号-槽机制. */
 public:
 	FittingMeshViewer(void);
 	~FittingMeshViewer(void);
@@ -57,54 +61,52 @@ public:
 	void update_fitting_view();
 	void clear_data();
 	void set_fitted_mesh_view(bool fv);
-	void set_control_point(Array2 point);
-     void set_error_show(bool ev);
-	
-	void set_max_error_point_show(bool mv);
-	void set_controledge_show(bool cv);
-	
-	void set_adjustpoints_enabled(bool av);
-	void set_adjustedmesh_enabled(bool av);
+	void set_control_point(Array2 point);   /**< 设置控制顶点*/
+
+    void set_error_show(bool ev);            /**< 设置误差网格是否显示 */  
+	void set_max_error_point_show(bool mv);  /**< 设置最大的误差点是否显示*/
+	void set_controledge_show(bool cv);      /**< 设置控制网格是否显示 */
+
 	bool write_mesh(QString &fileName, Mesh_Type type);
 	
 signals:
-	void position_changed();
+	
 protected:
 	virtual void draw();
 	virtual void init();
-	void draw_error_colorbar(QPainter *painter);
 	virtual void paintGL() { update(); };
 	virtual void paintEvent(QPaintEvent *event);
+
+    void draw_error_colorbar(QPainter *painter); /**< 绘制拟合误差颜色条 */
 	
 
 private:
 	void setDefaultMaterial();
-	void draw_original_mesh();
-	void draw_fitted_mesh();
-	void draw_control_mesh_orginal();
-	void draw_error_mesh();
-	void draw_max_error_point();
+	void draw_fitted_mesh();             /**< 绘制拟合网格 */
+	void draw_control_mesh_orginal();    /**< 绘制控制网格*/
+	void draw_error_mesh();              /**< 绘制误差网格 */
+	void draw_max_error_point();         /**< 绘制最大拟合误差点*/
 	
-	void set_scene(Bbox_3 &box);
+	void set_scene(Bbox_3 &box);         /**< 设置场景半径和中心*/
 	
 
 	CSurfaceData *surfacedata;
-	Array2 ControlPoint;
+	Array2 ControlPoint;               /**< 控制顶点矩阵 */
 	
-	 double max_err;
+	 double max_err;                    /**< 最大拟合误差*/
 
-	bool bfitted_mesh_view;
+	bool bfitted_mesh_view;             /**< 拟合网格是否可视*/
 
-	  bool berror_show;
+	  bool berror_show;                  /**< 拟合误差网格是否可视*/
 
-	  bool bcontroledge_show;
-	  bool bmax_error_point_show;
-	  bool badjustedmesh_show;
-	  bool badjust;
+	  bool bcontroledge_show;             /**< 拟合控制网格是否可视*/
+
+	  bool bmax_error_point_show;         /**< 拟合最大误差点是否可视*/
+
 	
-	double radius;
-	
-	Bbox_3 bBox;
+	 double radius;    /**< 场景半径*/           
+	 
+	  Bbox_3 bBox;     /**< 场景包围盒*/
 };
 
 //--------------------------------------------

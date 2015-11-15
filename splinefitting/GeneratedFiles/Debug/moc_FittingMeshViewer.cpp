@@ -22,33 +22,25 @@ static const uint qt_meta_data_FittingMeshViewer[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       1,   14, // methods
+       0,    0, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       1,       // signalCount
-
- // signals: signature, parameters, type, tag, flags
-      19,   18,   18,   18, 0x05,
+       0,       // signalCount
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_FittingMeshViewer[] = {
-    "FittingMeshViewer\0\0position_changed()\0"
+    "FittingMeshViewer\0"
 };
 
 void FittingMeshViewer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
-    if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
-        FittingMeshViewer *_t = static_cast<FittingMeshViewer *>(_o);
-        switch (_id) {
-        case 0: _t->position_changed(); break;
-        default: ;
-        }
-    }
+    Q_UNUSED(_o);
+    Q_UNUSED(_id);
+    Q_UNUSED(_c);
     Q_UNUSED(_a);
 }
 
@@ -83,17 +75,6 @@ int FittingMeshViewer::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     _id = QGLViewer::qt_metacall(_c, _id, _a);
     if (_id < 0)
         return _id;
-    if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 1)
-            qt_static_metacall(this, _c, _id, _a);
-        _id -= 1;
-    }
     return _id;
-}
-
-// SIGNAL 0
-void FittingMeshViewer::position_changed()
-{
-    QMetaObject::activate(this, &staticMetaObject, 0, 0);
 }
 QT_END_MOC_NAMESPACE

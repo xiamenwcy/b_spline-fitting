@@ -230,8 +230,7 @@ bool  CBSplineSurfaceView::fitting_bspline( Mesh *mesh)
     if (!solvecontrolpoint(mesh))
         return false;
 
-	m_pFittedMesh=new Mesh;
-	*m_pFittedMesh=*mesh;
+	m_pFittedMesh=new Mesh(*mesh);
 
 	Point3D p;
 

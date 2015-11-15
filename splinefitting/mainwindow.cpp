@@ -46,7 +46,7 @@ mainwindow::mainwindow(void)
     is_ever_open=false;
 
 	surfacedata = new(std::nothrow)  CSurfaceData();
-	meshwindow->set_surface_data(surfacedata);
+	meshwindow->set_surface_data(surfacedata); //浅复制，共享一个地址
 	knotswindow->set_surface_data(surfacedata);
 	fitwindow->set_surface_data(surfacedata);
 
@@ -263,7 +263,7 @@ void mainwindow::clear_data()
 	fitwindow->clear_data();
 	delete surfacedata ;
 	surfacedata=NULL;
-	surfacedata = new CSurfaceData();
+	surfacedata = new(std::nothrow) CSurfaceData();
 	surfacedata->iter_num=1;
 	meshwindow->set_surface_data(surfacedata);
 	knotswindow->set_surface_data(surfacedata);
@@ -467,35 +467,49 @@ void mainwindow::input_parameter()
 {
 	bool ok;
 	
-	B_parameter *parameter=new B_parameter(0,0,0,0);
-	int value1=QInputDialog::getInt(this,tr("parameter inputting"),tr("Please input parameter p:"),3,1,100,1,&ok);
-
+	B_parameter *parameter=new(std::nothrow) B_parameter(0,0,0,0);
+	if (parameter==NULL)//分配失败
+	{
+		return;
+	}
+	int p,q,m,n;
+input:
+	 p=QInputDialog::getInt(this,tr("parameter inputting"),tr("Please input parameter p:"),3,1,100,1,&ok);
 	if (ok){	
-		parameter->setp(value1);
-		int value2=QInputDialog::getInt(this,tr("parameter inputting"),tr("Please input parameter q:"),3,1,100,1,&ok);
+		parameter->setp(p);
+		 q=QInputDialog::getInt(this,tr("parameter inputting"),tr("Please input parameter q:"),3,1,100,1,&ok);
 		if (ok)
 		{
-			parameter->setq(value2);
-			int value3=QInputDialog::getInt(this,tr("parameter inputting"),tr("Please input parameter m:"),3,1,100,1,&ok);
+			parameter->setq(q);
+			 m=QInputDialog::getInt(this,tr("parameter inputting"),tr("Please input parameter m:"),3,1,100,1,&ok);
 			if (ok)
 			{
-				parameter->setm(value3);
-				int value4=QInputDialog::getInt(this,tr("parameter inputting"),tr("Please input parameter n:"),3,1,100,1,&ok);
+				parameter->setm(m);
+				 n=QInputDialog::getInt(this,tr("parameter inputting"),tr("Please input parameter n:"),3,1,100,1,&ok);
 				if (ok)
 				{
-					parameter->setn(value4);
+					parameter->setn(n);
 				}
 			}
 		}
 
 	}
-	int a=parameter->getm()+2-parameter->getp();
-	int b=parameter->getn()+2-parameter->getq();
+	// m>=p,n>=q 
+    if (m<p||n<q)
+    {
+		QMessageBox::critical(this,tr("Input Error:"),tr("Note: m>=p,n>=q. Please input again."),QMessageBox::Ok);
+		goto input;
+    }
+	int a=m+2-p;
+	int b=n+2-q;
 	parameter->setnum(a,b);
 	if (surfacedata==NULL)
 		return;
+	surfacedata->unum=a;
+	surfacedata->vnum=b;
 	surfacedata->setparameter(parameter);
 	meshfittingAction->setEnabled(true);
+
 }
 
 void mainwindow::add_vertical_knots()

@@ -34,7 +34,7 @@ public:
 	B_parameter(void);
 	~B_parameter(void);
 	B_parameter(int p1,int q1,int m1,int n1);
-	bool operator ==(B_parameter &c){return (p==c.p)&&(q==c.q)&&(m==c.m)&&(n==c.n);}
+	bool operator== (const B_parameter &c);
 	bool compute_knots();
 	bool configure_knots();//初始时刻，就是compute_knots,后来迭代时更新节点
 	vector<double>  getuknot();
@@ -60,7 +60,7 @@ private:
 	int n;
 	int num_u;
 	int num_v;
-	vector<double>  uknot;
+	vector<double>  uknot;   
 	vector<double>  vknot;
 	
 };

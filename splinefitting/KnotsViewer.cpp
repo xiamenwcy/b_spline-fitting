@@ -31,18 +31,16 @@
 KnotsViewer::KnotsViewer(void)
 {	
 	surfacedata = NULL;
-	//basis_index = -1;
+	parameter2=NULL;
+
 	bknotsview = false;
 	bcurvature_show=false;
 	berror_show=false;
-	parameter2=NULL;
-	
-	 bmeshdomainview= false;
-	 setAutoBufferSwap( false );
-	 setAutoFillBackground( false );
+    bmeshdomainview= false;
 	berrordomainview = false;
 
-
+	setAutoBufferSwap( false );
+	setAutoFillBackground( false );
 }
 
 void KnotsViewer::clear_data()
@@ -120,7 +118,7 @@ void KnotsViewer::init()
 	restoreStateFromFile();
 	setBackgroundColor(QColor(255,255,255,0));
     setMouseBinding(Qt::NoModifier, Qt::LeftButton, NO_CLICK_ACTION);
-	//setMouseBinding(Qt::NoModifier, Qt::LeftButton, CAMERA, ROTATE);
+	setMouseBinding(Qt::ShiftModifier, Qt::LeftButton, CAMERA, SCREEN_ROTATE);//重新设置LeftButton，旋转屏幕或者物体
 }
 
 void KnotsViewer::draw_knots()
@@ -204,7 +202,6 @@ void KnotsViewer::draw_fitting_error_domain()
 	//glLineWidth(0.5);
 	for (; f_it!=f_end; ++f_it)
 	{
-		//glBegin(GL_LINE_LOOP);
 		glBegin(GL_TRIANGLES);
 		fv_it = mesh->cfv_iter(*f_it); 
 		glColor3ubv(mesh->color(*fv_it).data());
@@ -279,7 +276,6 @@ void KnotsViewer::draw_curvature_mesh()
 	for (; f_it!=f_end; ++f_it)
 	{
 		
-		//glBegin(GL_LINE_LOOP);
 		glBegin(GL_TRIANGLES);
 		fv_it = mesh->cfv_iter(*f_it); 
 		glColor3ubv(mesh->color(*fv_it).data());
@@ -638,7 +634,6 @@ void KnotsViewer::error_fitting_view(bool kv)
 void KnotsViewer::set_domain_mesh_view(bool dv)
 {
 	bmeshdomainview=dv;
-	//surfacedata->range_query2();
 	updateGL();
 }
 	

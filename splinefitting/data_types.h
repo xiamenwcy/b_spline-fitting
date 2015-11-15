@@ -28,6 +28,15 @@ enum Mesh_Type
 	None              /**<  other */
 };
 
+/** Point and Triangle location Relative to some Rectangle */
+enum Location_Type
+{
+	inside = -1,        /**<  -1  */
+	boundary =0,        /**<  0   */
+	outside =1,         /**<  1   */
+	unknown = 3         /**<  3   */
+
+};
 struct Max_Error
 {
 	double error;

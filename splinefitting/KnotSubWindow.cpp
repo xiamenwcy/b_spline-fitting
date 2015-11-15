@@ -66,6 +66,7 @@ void KnotSubWindow::createActions()
 
 	domainmeshAction  = new QAction(tr("Domain Mesh"), this);
 	domainmeshAction->setCheckable(true);
+    domainmeshAction->setDisabled(true);
 	connect(domainmeshAction, SIGNAL(toggled(bool)), this, SLOT(set_mesh_view(bool)));
 
 	curvature_error_Action = new QAction(tr("Curvature Error"), this);
@@ -107,7 +108,7 @@ void KnotSubWindow::set_surface_data(CSurfaceData *data)
 }
 void KnotSubWindow::update_view()
 {
-
+    domainmeshAction->setEnabled(true);
 	knotsViewer->update_view();
 }
 

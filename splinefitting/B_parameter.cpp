@@ -49,6 +49,10 @@ B_parameter::B_parameter(int p1,int q1,int m1,int n1)
 	num_u=num_v=0;
 	iteration_ok=false;
 }
+bool B_parameter::operator== (const B_parameter &c)
+{
+	return (p==c.p)&&(q==c.q)&&(m==c.m)&&(n==c.n);
+}
 void B_parameter::setnum(int a,int b)
 {
 	num_u=a;
