@@ -124,7 +124,7 @@ private:
 	/**     load a new modle      */
 	void loadmodel(const QString &fileName);
 	/**     clear old data and build new data      */
-	void clear_data();
+	bool clear_data();
 
     /**    extracte file name from the full path     */
 	QString strippedName(const QString &fullFileName);

@@ -31,6 +31,7 @@
 #include <iostream>
 #include <algorithm>
 #include <assert.h> //仅供debug模式使用
+#include <set>
 
 //CGAL
 #include <CGAL/Bbox_2.h>
@@ -90,6 +91,15 @@ public:
 	void  range_query2();                  /**< 修订节点线         */
 	bool  rangequery_vertical;             /**< 标定adjust_vertical_knots()关于range_query()的执行情况*/
 	bool  rangequery_horizon;              /**< 标定adjust_horizon_knots()关于range_query()的执行情况*/
+     /**
+       * 在data中找第一个大于等于k的元素序号，并减去1，即找一个区间[a,b],使得a<=k<=b,返回区间的序号
+	   * @param[in]  data  query sequence .
+	   * @param[in]   k    query value.
+       * @return index.
+       */
+	int GetFirstK(vector<double>& data, double& k);
+	/** uknots和vknots是水平和竖直的节点线，构成了若干个小矩形，p为其中一点，找到这个点所在的矩形区域序号 */
+	int location(vector<double>& uknots,vector<double>& vknots,TexCoord& p);
 
 	int   sum(std::vector<KnotData> &vec);
 	void   set_max_curvature(double curvature);
@@ -159,13 +169,14 @@ public:
 	int vnum;
 
 	 static int iter_num;
-	 ANNkd_tree*			kdTree;		/**<  search data structure */
+	 ANNkd_tree*			kdTree;		/**< ANN search    */
 	 double curaverage_;                /**< 曲率积分平均值 */
 	 double erroraverage_;              /**< 误差积分平均值 */
 
      vector<vector<int> >  horizon_index; /**< 水平条形，存储顺序是从下面到上面，从小到大，存储内部和边界节点序号*/
      vector<vector<int> >  vertical_index;/**< 竖直条形，存储顺序是从左到右，从小到大，存储内部和边界节点序号 */
-     // vector<int>   test;   //检测面包含的点数
+     vector<int>   test;   //检测面包含的点数
+	 set<int>   test2;   //检测面包含的点数
    
 
 	void  set_max_error(double &err);     /**< 设置最大误差，并且为每个拟合点着色 */
@@ -179,6 +190,7 @@ public:
 	Mesh *get_error_fitted_mesh();
 	void update_polymesh();
 	MyMesh get_polymesh();
+	QString  get_filename(); //返回载入的文件名
 
 private:
 

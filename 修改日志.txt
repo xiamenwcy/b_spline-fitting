@@ -1,3 +1,7 @@
 11.13  修复Warning: A paint device can only be painted by one painter at a time.
             办法：在paintevent()里去掉下面的painter->begin(this);因为出现了两次。
             参考：bool QPainter::begin ( QPaintDevice * device )的说明
+11.14  去掉类中无关函数，设置节点线网格初始参数化不可见，待参数化后可见。
+11.15 定义B_parameter ==的函数，用在void KnotsViewer::set_knots_view(bool kv) 
+11.18 使用正则表达式准确识别了载入网格文件的后缀名、正确的曲率文件，
+          提出了新的查找矩形区域三角系的方法

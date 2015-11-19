@@ -229,7 +229,8 @@ void mainwindow::createMenus()
 void mainwindow::open()
 {
 	QString fileName = QFileDialog::getOpenFileName(this, 
-		tr("Select File..."), "./splinefitting/model", tr("Model Files(*.off *.obj *.stl)"));
+		tr("Select File..."), "./splinefitting/model", tr("Model Files(*.off *.obj *.stl *.*)"));
+
 	if(!fileName.isEmpty())
 	{
 		loadmodel(fileName);
@@ -239,7 +240,11 @@ void mainwindow::loadmodel(const QString &fileName)
 {
 	if(is_ever_open)
 	{
-		clear_data();
+		if(!clear_data())
+		{
+			statusBar()->showMessage(tr("Loading mesh unsuccessfully"), 2000);
+			return;
+		}	
 	}
 	if (!surfacedata->read_mesh(fileName))
 	{
@@ -256,7 +261,7 @@ void mainwindow::loadmodel(const QString &fileName)
 	is_ever_open=true;
 
 }
-void mainwindow::clear_data()
+bool mainwindow::clear_data()
 {
 	meshwindow->clear_data();
 	knotswindow->clear_data();
@@ -264,10 +269,15 @@ void mainwindow::clear_data()
 	delete surfacedata ;
 	surfacedata=NULL;
 	surfacedata = new(std::nothrow) CSurfaceData();
+	if (surfacedata==NULL) //分配内存失败
+	{
+		return false;
+	}
 	surfacedata->iter_num=1;
 	meshwindow->set_surface_data(surfacedata);
 	knotswindow->set_surface_data(surfacedata);
 	fitwindow->set_surface_data(surfacedata);
+	return true;
 }
 void mainwindow::openRecentFile()
 {
@@ -447,9 +457,41 @@ void mainwindow::adjust_upper()
 }
 void  mainwindow::load_curvature()
 {
+	//先调取原始网格文件名,并构造新正则表达式
+	QString fileName=surfacedata->get_filename();//filename包含路径,例如：c:\Users\mainwindow.cpp
+	if (fileName.isEmpty())
+	{
+		QMessageBox::critical(this,tr("Open File Error:"),tr("Mesh file has not opened.Please open mesh file firstly."),QMessageBox::Ok);
+		return;
+	}
+	QRegExp rx1("([^/]+)\\..+"); 
+	int pos=rx1.indexIn(fileName);   
+	assert(pos!=-1);
+	QString simple_filename=rx1.cap(1)+"_k[1-2]";       //simple_filename不包含路径,例如：上面的mainwindow_k1或者mainwindow_k2
+	QString pattern=(simple_filename)+"\\..+";  //构造新的正则表达式，例如：匹配mainwindow_k1.obj或者mainwindow_k2.obj
+    QRegExp rx2(pattern);
+	//再载入曲率文件
+input:
 	QStringList files = QFileDialog::getOpenFileNames(this, 
                 tr("Load two curvature files:"), "./splinefitting/model", tr("Curvature Files(*.txt)"));
-	if (files.size()==2&& surfacedata->compute_curvature(files))
+    if (files.size()!=2)
+    {
+		QMessageBox::critical(this,tr("Open File Error:"),tr("File number is overmuch.Please open two files."),QMessageBox::Ok);
+		goto input;
+    }
+    QStringList temp(files);
+	QString filename1=temp.takeFirst();
+	QString filename2=temp.takeFirst();
+
+
+	if ((rx2.indexIn(filename1)==-1)||(rx2.indexIn(filename2)==-1))
+	{
+		QMessageBox::critical(this,tr("Open File Error:"),tr("Curvature filename is not  same with mesh filename.Please open correct curvature files."),QMessageBox::Ok);
+		goto input;
+
+	}
+
+	if ( surfacedata->compute_curvature(files))
 	{
 		statusBar()->showMessage(tr("Loading curvature successfully"), 2000);
 		surfacedata->set_curvature_loadingstate(true);
@@ -458,8 +500,10 @@ void  mainwindow::load_curvature()
 	{
 		statusBar()->showMessage(tr("Loading curvature unsuccessfully"), 2000);
 		surfacedata->set_curvature_loadingstate(false);
-	}
 
+	}
+	
+	
 
 }
 
@@ -555,8 +599,11 @@ void  mainwindow::adjust_knots_by_curvature()
 	int value1=QInputDialog::getInt(this,tr("Iteration Times inputting"),tr("Please input iteration times :"),0,0,100,1,&ok);
 	if(!ok)
 		return;
-	int ret=QMessageBox::question(this,tr("Curvature Loding:"),tr("Curvature lodded successfully?  If not,please Loading Curvature."),QMessageBox::Yes,QMessageBox::No);
-	if(ret==QMessageBox::No)
+	int ret1=QMessageBox::question(this,tr("Knots line Loding:"),tr("Knots line lodded successfully?  If not,please Loading Knots line."),QMessageBox::Yes,QMessageBox::No);
+	if(ret1==QMessageBox::No)
+		return;
+	int ret2=QMessageBox::question(this,tr("Curvature Loding:"),tr("Curvature lodded successfully?  If not,please Loading Curvature."),QMessageBox::Yes,QMessageBox::No);
+	if(ret2==QMessageBox::No)
 		return;
    surfacedata->set_knots_iteration_times(value1);
 	if(!surfacedata->adjust_knots_by_curvature())
