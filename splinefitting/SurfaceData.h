@@ -91,13 +91,7 @@ public:
 	void  range_query2();                  /**< 修订节点线         */
 	bool  rangequery_vertical;             /**< 标定adjust_vertical_knots()关于range_query()的执行情况*/
 	bool  rangequery_horizon;              /**< 标定adjust_horizon_knots()关于range_query()的执行情况*/
-     /**
-       * 在data中找第一个大于等于k的元素序号，并减去1，即找一个区间[a,b],使得a<=k<=b,返回区间的序号
-	   * @param[in]  data  query sequence .
-	   * @param[in]   k    query value.
-       * @return index.
-       */
-	int GetFirstK(vector<double>& data, double& k);
+
 	/** uknots和vknots是水平和竖直的节点线，构成了若干个小矩形，p为其中一点，找到这个点所在的矩形区域序号 */
 	int location(vector<double>& uknots,vector<double>& vknots,TexCoord& p);
 
@@ -137,14 +131,6 @@ public:
        * @return The intersection results: True or False.
        */
 	 bool intersection_st( Triangle_2 tri,Segment_2 seg,double *length); 
-   /**
-       * Triangle and  rectangle intersect whether or not ?
-	   * @param[out] Area  intersecting Area.
-	   * @param[in]  tri   A planar triangle.
-	   * @param[in]  rec   A planar rectangle.
-       * @return The intersection results: True or False.
-       */
-	 bool  intersection_rt(Triangle_2 tri,Iso_rectangle_2 rec,double *Area);  
 
 	void  update_curvature_color();
 
@@ -158,7 +144,7 @@ public:
 	bool  adjust_knots_by_curvature();
 	/** 按照拟合误差调整节点线 */
 	bool  adjust_knots_by_fitting_error();
-    /** 修订不合适的节点 */
+    /** 扰动与修订不合适的节点 */
 	void  modification();
 
     vector<double> uknots;

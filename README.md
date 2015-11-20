@@ -19,7 +19,7 @@
 
 使用正则表达式准确识别了载入网格文件的后缀名、正确的曲率文件，提出了新的查找矩形区域三角系的方法
 
-- 2015年11月20日
+- 2015年11月19日
 
  找到两种方法替代原始的确定矩形区域包含的三角形，以及如何求解面积分和线积分。
   + 遍历Mesh的三角形，以重心落在矩形区域里面确定三角形也落在矩形区域里面，这其中需要用折半查找法确定重心所在的矩形区域。
@@ -38,7 +38,11 @@
 
     第8条节点线（也就是第2个矩形面和第3个矩形面相交的线段）所关联的三角形：
     ![][4]
-
+- 2015年11月20日
+  + 修复错误 
+  void  CSurfaceData::update_knots(int k)中计算面积分和线积分 
+  polymesh.property(f_area,*f_it)+= m_pOriginalMesh->property(f_mean_curvature2,*f_it)*Area;改为
+  polymesh.property(f_area,*f_it)+= m_pOriginalMesh->property(f_mean_curvature2,fh3)*Area;
 
 
 
