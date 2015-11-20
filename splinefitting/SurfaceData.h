@@ -175,8 +175,10 @@ public:
 
      vector<vector<int> >  horizon_index; /**< 水平条形，存储顺序是从下面到上面，从小到大，存储内部和边界节点序号*/
      vector<vector<int> >  vertical_index;/**< 竖直条形，存储顺序是从左到右，从小到大，存储内部和边界节点序号 */
-     vector<int>   test;   //检测面包含的点数
-	 set<int>   test2;   //检测面包含的点数
+  //   set<int>   test1;   //检测面包含的点数
+	 //set<int>   test2;   //检测面包含的点数
+	 //set<int>   test3;   //检测面包含的点数
+
    
 
 	void  set_max_error(double &err);     /**< 设置最大误差，并且为每个拟合点着色 */
