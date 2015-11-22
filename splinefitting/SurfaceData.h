@@ -91,13 +91,7 @@ public:
 	void  range_query2();                  /**< 修订节点线         */
 	bool  rangequery_vertical;             /**< 标定adjust_vertical_knots()关于range_query()的执行情况*/
 	bool  rangequery_horizon;              /**< 标定adjust_horizon_knots()关于range_query()的执行情况*/
-     /**
-       * 在data中找第一个大于等于k的元素序号，并减去1，即找一个区间[a,b],使得a<=k<=b,返回区间的序号
-	   * @param[in]  data  query sequence .
-	   * @param[in]   k    query value.
-       * @return index.
-       */
-	int GetFirstK(vector<double>& data, double& k);
+   
 	/** uknots和vknots是水平和竖直的节点线，构成了若干个小矩形，p为其中一点，找到这个点所在的矩形区域序号 */
 	int location(vector<double>& uknots,vector<double>& vknots,TexCoord& p);
 
@@ -158,6 +152,13 @@ public:
 	bool  adjust_knots_by_curvature();
 	/** 按照拟合误差调整节点线 */
 	bool  adjust_knots_by_fitting_error();
+
+	/**  更新矩形网格polymesh,并查询矩形区域中包含的三角形 */
+	void   update_polymesh_and_query();
+
+	/**  建立矩形网格*/
+	MyMesh  build_polymesh();
+
     /** 修订不合适的节点 */
 	void  modification();
 

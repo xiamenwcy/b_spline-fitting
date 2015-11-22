@@ -98,7 +98,7 @@ CSurfaceData::~CSurfaceData(void)
 	 clear_data();
 	 delete kdTree;
 	 kdTree=NULL;
-	//annClose();	
+	 annClose();	
 
 		
 }
@@ -2711,7 +2711,10 @@ bool   CSurfaceData::adjust_knots_by_curvature()
 	 dqFreq=(double)f.QuadPart;
 	 QueryPerformanceCounter(&time_start);
 
-	
+	 //增加三角形曲率积分属性
+	 OpenMesh::FPropHandleT<double> tri_integral; //添加三角形面积分属性
+	 m_pOriginalMesh->add_property(tri_integral,"tri_integral"); 
+
 	//求解平均曲率积分总和
      double sum=0.0;
 	  Mesh::FaceIter  f_it,f_end(m_pOriginalMesh->faces_end());
@@ -2726,50 +2729,14 @@ bool   CSurfaceData::adjust_knots_by_curvature()
 		  B=m_pOriginalMesh->texcoord2D(*fv_it);
 		  ++fv_it;
 		  C=m_pOriginalMesh->texcoord2D(*fv_it);
-		  sum+=ts2*abs(CGAL::area(Point_2(A[0],A[1]),Point_2(B[0],B[1]),Point_2(C[0],C[1])));
+		  double integral=ts2*abs(CGAL::area(Point_2(A[0],A[1]),Point_2(B[0],B[1]),Point_2(C[0],C[1])));
+		  m_pOriginalMesh->property(tri_integral,*f_it)=integral;
+		  sum+=integral;
 	  }
 	  double num3=(unum-1)*(vnum-1);
 	  double  fa=sum/num3;
 	  curaverage_=fa;
 	  cout<<"平均曲率积分为:"<<curaverage_<<endl;
-
-//-------------------------------------------------------------------- kd-tree
-
-	  //int					nPts;					// actual number of data points
-	  //ANNpointArray		dataPts;				// data points
-	  //int				maxPts= m_pOriginalMesh->n_vertices();			// maximum number of data points 				
-	  //dataPts = annAllocPts(maxPts, 2);			// allocate data points
-
-	  //nPts = 0;	
-	  //Mesh::VertexIter          v_it, v_end(m_pOriginalMesh->vertices_end());
-	  //for (v_it=m_pOriginalMesh->vertices_begin(); v_it!=v_end; ++v_it,nPts++)
-	  //{
-		 // dataPts[nPts][0]=m_pOriginalMesh->texcoord2D(*v_it)[0];
-		 // dataPts[nPts][1]=m_pOriginalMesh->texcoord2D(*v_it)[1];
-		 // assert(nPts==(*v_it).idx());
-	  //}
-	  //kdTree = new(std::nothrow) ANNkd_tree(					// build search structure
-		 // dataPts,					// the data points
-		 // nPts,						// number of points
-		 // 2);						// dimension of space
-//-------------------------------------------------------------------- kd-tree
-
-	  //增加原始曲面的两个属性
-	  //OpenMesh::VPropHandleT<Location_Type> v_location; //添加点属性
-	  //m_pOriginalMesh->add_property(v_location,"v_location");
-
-	  //OpenMesh::FPropHandleT<Location_Type> f_location; //添加面属性
-	  //m_pOriginalMesh->add_property(f_location,"f_location");
-
-	/*  for (v_it=m_pOriginalMesh->vertices_begin();v_it!=v_end;++v_it)
-	  {
-		  m_pOriginalMesh->property(v_location,*v_it)=unknown;
-
-	  }
-	  for (f_it=m_pOriginalMesh->faces_begin(); f_it!=f_end; ++f_it)
-	  {
-		  m_pOriginalMesh->property(f_location,*f_it)=unknown;
-	  }*/
 
 //-------------------------------------------------------------------- 迭代
 
@@ -3603,74 +3570,30 @@ bool  CSurfaceData::intersection_rt(Triangle_2 tri,Iso_rectangle_2 rec,double *A
 	}
 
 }
-//使用了二分法
-int CSurfaceData::GetFirstK(vector<double>& data, double& k)
-{
 
-	int length=data.size();
-	//double min=*min_element(data.begin(),data.end());
-	//double max=*max_element(data.begin(),data.end());
-	//assert(k>min&&k<max);
-	int start = 0;
-	int end = length - 1;
-	while (start<=end)
-	{
-
-		int middleindex = (start + end) / 2;
-		double middledata = data[middleindex];
-		if (middledata<k)
-		{
-			start = middleindex + 1;
-		}
-		else 
-		{
-			if (middleindex==0&& abs(middledata-k)<=EPSILON2)
-			{
-				return 0;
-			}
-			else if (middleindex>0&&data[middleindex-1]<k)
-			{
-				return middleindex-1;
-			}
-			else
-			{
-				end = middleindex - 1;
-			}
-		}
-	}
-
-	return -1;
-
-}
 
 int CSurfaceData::location(vector<double>& uknots,vector<double>& vknots,TexCoord& p)
 {
-	if (uknots.empty()||vknots.empty())
+	if (uknots.empty() || vknots.empty())
 	{
 		return -1;
 	}
-	int unum=uknots.size();
-	int vnum=vknots.size();
-	int i=GetFirstK(uknots,p[0]);
-	int j=GetFirstK(vknots,p[1]);
-	if (i==-1||j==-1)
-	{
-		return -1;
-	}
-	int local=j*(unum-1)+i;
+	int unum = uknots.size();
+
+	vector<double>::iterator ui = lower_bound(uknots.begin(), uknots.end(),p[0]);//查找第一个大于等于p[0]的值
+	int i = distance(uknots.begin(), ui);
+	i =( i == 0 ? 0 : i - 1);
+	vector<double>::iterator vi = lower_bound(vknots.begin(), vknots.end(),p[1]);//查找第一个大于等于p[1]的值
+	int j = distance(vknots.begin(), vi);
+	j= (j == 0 ? 0 : j - 1);
+	int local = j*(unum - 1) + i;
 	return local;
 
 
 }
-
-void  CSurfaceData::update_knots(int k)
+MyMesh CSurfaceData::build_polymesh()
 {
-//-------------------------------------------------------------------------------------begin build polymesh
-
-
-	sort(uknots.begin(),uknots.end());
-	sort(vknots.begin(),vknots.end());
-
+	MyMesh polymesh;
 	//update_polymesh
 	polymesh.clear();
 
@@ -3683,77 +3606,34 @@ void  CSurfaceData::update_knots(int k)
 			vhandle[j][i]=polymesh.add_vertex(MyMesh::Point(uknots[i],vknots[j],0.0));
 		}
 
-	// generate (quadrilateral) faces
-	std::vector<MyMesh::VertexHandle>  face_vhandles;
-	for(int j=0;j<vnum-1;j++)
-		for (int i=0;i<unum-1;i++)
-		{
-			face_vhandles.clear();
-			face_vhandles.push_back(vhandle[j][i]);
-			face_vhandles.push_back(vhandle[j][i+1]);
-			face_vhandles.push_back(vhandle[j+1][i+1]);
-			face_vhandles.push_back(vhandle[j+1][i]);
-			polymesh.add_face(face_vhandles);
+		// generate (quadrilateral) faces
+		std::vector<MyMesh::VertexHandle>  face_vhandles;
+		for(int j=0;j<vnum-1;j++)
+			for (int i=0;i<unum-1;i++)
+			{
+				face_vhandles.clear();
+				face_vhandles.push_back(vhandle[j][i]);
+				face_vhandles.push_back(vhandle[j][i+1]);
+				face_vhandles.push_back(vhandle[j+1][i+1]);
+				face_vhandles.push_back(vhandle[j+1][i]);
+				polymesh.add_face(face_vhandles);
 
-		}
+			}
+	return polymesh;
+
+
+}
+void   CSurfaceData::update_polymesh_and_query()
+{
+//-----------------------------------------------------update_polymesh
+	        polymesh.clear();
+            polymesh=build_polymesh();
 //---------------------------------------------------------------------------------------  end 
-
-			OpenMesh::FPropHandleT<double> f_area;  //增加每个面的曲率面积属性
-			polymesh.add_property(f_area,"f_area");
-
-			OpenMesh::EPropHandleT<double> e_area;  //增加每条边的曲率积分属性
-			polymesh.add_property(e_area,"e_area");
 
 			OpenMesh::FPropHandleT<setint> f_index;  //增加每个面包含的三角形序号属性
 			polymesh.add_property(f_index,"f_index");
-
-			OpenMesh::FPropHandleT<double> f_mean_curvature2; //获取曲率属性
-			m_pOriginalMesh->get_property_handle(f_mean_curvature2,"f_mean_curvature");
-
-
-			for (MyMesh::EdgeIter  ed=polymesh.edges_begin();ed!=polymesh.edges_end();++ed)
-			{
-				polymesh.property(e_area,*ed)=0.0;
-			}
-
-			for (MyMesh::FaceIter f2_it=polymesh.faces_begin();f2_it!=polymesh.faces_end();++f2_it)
-			{
-				polymesh.property(f_area,*f2_it)=0.0;
-			}
-
-		
-
-//-------------------------------------------------------------------------------------------  先对每个面对积分
-			//------------------------------------------------------------------方法一、重心坐标
-			//Mesh::FaceIter f2_it,f2_end(m_pOriginalMesh->faces_end());
-			//Mesh::FaceVertexIter  fv2_it;
-			//
-			//for (f2_it=m_pOriginalMesh->faces_begin();f2_it!=f2_end;++f2_it)
-			//{
-			//	TexCoord A,B,C;
-			//	fv_it2=m_pOriginalMesh->fv_iter(*f2_it);
-			//	A=m_pOriginalMesh->texcoord2D(*fv_it2);
-			//	++fv_it2;
-			//	B=m_pOriginalMesh->texcoord2D(*fv_it2);
-			//	++fv_it2;
-			//	C=m_pOriginalMesh->texcoord2D(*fv_it2);
-			//	//double  Area=abs(CGAL::area(Point_2(A[0],A[1]),Point_2(B[0],B[1]),Point_2(C[0],C[1])));  
-   //            TexCoord barycenter;
-   //            barycenter=(A+B+C)/3;
-   //            int index=location(uknots, vknots,barycenter);
-			//   if (index==-1)
-			//   {
-			//	   throw  std::exception("Point Location Exception!");
-			//	   return;
-			//   }
-   //            MyMesh::FaceHandle   fh=polymesh.face_handle(index);
-   //            polymesh.property(f_index,fh).push_back((*f2_it).idx());
-   //           
-			//}
-			//MyMesh::FaceHandle   fh2=polymesh.face_handle(0);
-			//test.assign(polymesh.property(f_index,fh2).begin(),polymesh.property(f_index,fh2).end());
-
-   //---------------------------------------------------------------------------方法二
+	
+   //---------------------------------------------------------------------------
 			//区域定位和查询
 
 			Mesh::VertexIter          v_it, v_end(m_pOriginalMesh->vertices_end());
@@ -3780,6 +3660,44 @@ void  CSurfaceData::update_knots(int k)
 			test2=polymesh.property(f_index,fh3);
 			MyMesh::FaceHandle   fh4=polymesh.face_handle(8);
 			test3=polymesh.property(f_index,fh4);*/
+
+}
+void  CSurfaceData::update_knots(int k)
+{
+//-------------------------------------------------------------------------------------begin build polymesh
+         //更新polymesh，并查询矩形区域包含的三角形
+
+           	sort(uknots.begin(),uknots.end());
+	        sort(vknots.begin(),vknots.end());
+
+	        update_polymesh_and_query();
+//---------------------------------------------------------------------------------------  end 
+
+			OpenMesh::FPropHandleT<double> f_area;  //增加每个面的曲率面积属性
+			polymesh.add_property(f_area,"f_area");
+
+			OpenMesh::EPropHandleT<double> e_area;  //增加每条边的曲率积分属性
+			polymesh.add_property(e_area,"e_area");
+
+			for (MyMesh::EdgeIter  ed=polymesh.edges_begin();ed!=polymesh.edges_end();++ed)
+			{
+				polymesh.property(e_area,*ed)=0.0;
+			}
+
+			for (MyMesh::FaceIter f2_it=polymesh.faces_begin();f2_it!=polymesh.faces_end();++f2_it)
+			{
+				polymesh.property(f_area,*f2_it)=0.0;
+			}
+
+			OpenMesh::FPropHandleT<setint> f_index;  //增加每个面包含的三角形序号属性
+			polymesh.get_property_handle(f_index,"f_index");
+
+			OpenMesh::FPropHandleT<double> f_mean_curvature2; //获取曲率属性
+			m_pOriginalMesh->get_property_handle(f_mean_curvature2,"f_mean_curvature");
+
+			OpenMesh::FPropHandleT<double> tri_integral; //获取三角形面积分属性
+			m_pOriginalMesh->get_property_handle(tri_integral,"tri_integral"); 
+		
 //-------------------------------------------------------------------------------------------------
                //计算面积分和线积分
 			MyMesh::FaceIter f_it,f_end(polymesh.faces_end());
@@ -3789,16 +3707,7 @@ void  CSurfaceData::update_knots(int k)
 				for (setint::iterator s_it=tri_set.begin();s_it!=tri_set.end();++s_it)
 				{
 					Mesh::FaceHandle  fh3=m_pOriginalMesh->face_handle(*s_it);
-					Mesh::FaceVertexIter  fv_it2;
-					TexCoord A,B,C;
-					fv_it2=m_pOriginalMesh->fv_iter(fh3);
-					A=m_pOriginalMesh->texcoord2D(*fv_it2);
-					++fv_it2;
-					B=m_pOriginalMesh->texcoord2D(*fv_it2);
-					++fv_it2;
-				    C=m_pOriginalMesh->texcoord2D(*fv_it2);
-					double  Area=abs(CGAL::area(Point_2(A[0],A[1]),Point_2(B[0],B[1]),Point_2(C[0],C[1])));  
-				    polymesh.property(f_area,*f_it)+= m_pOriginalMesh->property(f_mean_curvature2,*f_it)*Area;
+				   polymesh.property(f_area,*f_it)+= m_pOriginalMesh->property(tri_integral,fh3);
 
 				}
 			}
@@ -3816,10 +3725,10 @@ void  CSurfaceData::update_knots(int k)
                     setint l_set=polymesh.property(f_index,f1);
 					setint r_set=polymesh.property(f_index,f2);
 					set_intersection(l_set.begin(),l_set.end(),r_set.begin(),r_set.end(),insert_iterator<setint>(c,c.begin()));
-                   if((*e_it).idx()==21)
+                 /*  if((*e_it).idx()==21)
 				   {
 					test1=c;
-				   }
+				   }*/
 					//相交集合中的三角形跨越两个矩形区域，所以面积分加多了，减去一半刚刚好
 					for (setint::iterator iter=c.begin();iter!=c.end();++iter)
                     {
@@ -3833,10 +3742,10 @@ void  CSurfaceData::update_knots(int k)
 						B=m_pOriginalMesh->texcoord2D(*fv_it2);
 						++fv_it2;
 						C=m_pOriginalMesh->texcoord2D(*fv_it2);
-						double  Area=abs(CGAL::area(Point_2(A[0],A[1]),Point_2(B[0],B[1]),Point_2(C[0],C[1]))); 
-						double  result=t23*Area/2; //积分的一半
+						double  result=m_pOriginalMesh->property(tri_integral,fh3)/2; //积分的一半
 						polymesh.property(f_area,f1)-= result;   
 						polymesh.property(f_area,f2)-= result;  
+
 
 						Triangle_2  tri(Point_2 (A[0],A[1]),Point_2 (B[0],B[1]),Point_2 (C[0],C[1]));
 						MyMesh::VertexHandle     fv=polymesh.from_vertex_handle(he1),tv=polymesh.to_vertex_handle(he1);

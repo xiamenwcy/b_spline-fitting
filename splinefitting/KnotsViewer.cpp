@@ -261,22 +261,22 @@ void KnotsViewer::draw_domain_mesh()
    glEnd();*/
 
    //检测每个条形所包含的三角形
-	//glColor3d(1.0, 0.0, 0.0);
-	//set<int>  h=surfacedata->test2;
-	//Mesh::FaceVertexIter  fv_it2;
- //  for (set<int>::iterator p=h.begin();p!=h.end();++p)
- //  {
-	//   Mesh::FaceHandle f_it=mesh->face_handle(*p);
-	//   glBegin(GL_TRIANGLES);
-	//   fv_it2 = mesh->fv_iter(f_it); 
-	//   glVertex2dv(&mesh->texcoord2D(fv_it2)[0]);
-	//   ++fv_it2;
-	//   glVertex2dv(&mesh->texcoord2D(fv_it2)[0]);
-	//   ++fv_it2;
-	//   glVertex2dv(&mesh->texcoord2D(fv_it2)[0]);
-	//   glEnd();
- //  }
- 
+	/*glColor3d(1.0, 0.0, 0.0);
+	set<int>  h=surfacedata->test1;
+	Mesh::FaceVertexIter  fv_it2;
+   for (set<int>::iterator p=h.begin();p!=h.end();++p)
+   {
+	   Mesh::FaceHandle f_it=mesh->face_handle(*p);
+	   glBegin(GL_TRIANGLES);
+	   fv_it2 = mesh->fv_iter(f_it); 
+	   glVertex2dv(&mesh->texcoord2D(fv_it2)[0]);
+	   ++fv_it2;
+	   glVertex2dv(&mesh->texcoord2D(fv_it2)[0]);
+	   ++fv_it2;
+	   glVertex2dv(&mesh->texcoord2D(fv_it2)[0]);
+	   glEnd();
+   }
+ */
 	
 }
 void KnotsViewer::draw_curvature_mesh()
