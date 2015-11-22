@@ -88,7 +88,6 @@ public:
 	void  adjust_vertical_knots();         /**< 具体实施竖直节点的增加 */
 	void  adjust_horizon_knots();          /**< 具体实施水平节点的增加 */
 	void  range_query();                   /**< 查询每个条形的顶点 */
-	void  range_query2();                  /**< 修订节点线         */
 	bool  rangequery_vertical;             /**< 标定adjust_vertical_knots()关于range_query()的执行情况*/
 	bool  rangequery_horizon;              /**< 标定adjust_horizon_knots()关于range_query()的执行情况*/
    
@@ -161,6 +160,11 @@ public:
 
     /** 修订不合适的节点 */
 	void  modification();
+
+    /** 找到不含一个参数点的矩形区域，并删除相邻的节点线  */
+	void  query_isolated_range();     
+
+	bool  query_success;                     /**< query_isolated_range结束的标志 */
 
     vector<double> uknots;
 	vector<double> vknots;
