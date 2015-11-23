@@ -72,7 +72,7 @@ public:
 
     //original mesh
 	bool read_mesh(const QString &fileName);
-	int get_mesh_vertex_num();
+	int get_mesh_vertex_num();              /**< */
 	int get_mesh_face_num();
 	QString get_mesh_name();
 	Mesh *get_original_mesh();
@@ -195,7 +195,7 @@ public:
     double  get_min_knotcurerror();
 
 	Mesh *get_error_fitted_mesh();
-	void update_polymesh();
+	void update_polymesh();    /**< 更新按照曲率分布的节点线组成的polymesh并且查询曲率积分的误差 */
 	MyMesh get_polymesh();
 	QString  get_filename(); //返回载入的文件名
 
@@ -222,20 +222,20 @@ private:
 	Bbox_3 fittingbox;
 	Bbox_3 errorbox;
 
-	int sample_num;
+	int sample_num;         /**< 载入网格的顶点个数 */
 
 	double err_threshold;
     Max_Error max_err;      /**< 可修改的最大误差 */
 	double   max_err_real;  /**< 真实的未修改的最大误差 */
-	double max_meancurvature;
-	double min_meancurvature;
-	double max_curerror;
-	double min_curerror;
-	double mean_err;        /**< 均方根误差 */
-	double mean_e;
-     bool   Curvature_loading;
-	 bool   fitting_completed_;
-	 bool    curvature_error;
+	double max_meancurvature;   /**< 最大的平均曲率 */
+	double min_meancurvature;   /**< 最小的平均曲率 */
+	double max_curerror;        /**< 最大的曲率误差 */
+	double min_curerror;        /**< 最小的曲率误差 */
+	double mean_err;            /**< 均方根误差 */
+	double mean_e;              
+     bool   Curvature_loading;    /**< 标记曲率载入是否成功 */  
+	 bool   fitting_completed_;   /**< 标记拟合是否完成 */
+	 bool    curvature_error;  /**< 标记曲率积分的误差是否计算完毕  */
 	 void compute_box();
 
 };

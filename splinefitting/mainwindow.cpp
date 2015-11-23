@@ -17,6 +17,7 @@
 //Qt
 #include <QtGui/QtGui>
 #include <QtGui/QInputDialog>
+#include <cmath>
 
 #include "mainwindow.h"
 
@@ -516,6 +517,11 @@ void mainwindow::input_parameter()
 	{
 		return;
 	}
+	int Recommended_m=0; //m的推荐值
+	int Recommended_n=0; //n的推荐值
+
+	int pointNum = surfacedata->get_mesh_vertex_num();
+	
 	int p,q,m,n;
 input:
 	 p=QInputDialog::getInt(this,tr("parameter inputting"),tr("Please input parameter p:"),3,1,100,1,&ok);
@@ -525,11 +531,26 @@ input:
 		if (ok)
 		{
 			parameter->setq(q);
-			 m=QInputDialog::getInt(this,tr("parameter inputting"),tr("Please input parameter m:"),3,1,100,1,&ok);
+
+			if(pointNum!=-1)
+			{
+				double  epsi=pow(sqrt(double(pointNum)),-1); 
+				Recommended_m=int(1.0/(epsi*3))-1+p;
+				Recommended_m=Recommended_m<p?p:Recommended_m;
+				Recommended_n=int(1.0/(epsi*3))-1+q;
+				Recommended_n=Recommended_n<q?q:Recommended_n;
+			}
+			else
+			{
+				Recommended_m=p;
+				Recommended_n=q;
+
+			}
+			 m=QInputDialog::getInt(this,tr("parameter inputting"),tr("Please input parameter m:"),Recommended_m,1,100,1,&ok);
 			if (ok)
 			{
 				parameter->setm(m);
-				 n=QInputDialog::getInt(this,tr("parameter inputting"),tr("Please input parameter n:"),3,1,100,1,&ok);
+				 n=QInputDialog::getInt(this,tr("parameter inputting"),tr("Please input parameter n:"),Recommended_n,1,100,1,&ok);
 				if (ok)
 				{
 					parameter->setn(n);

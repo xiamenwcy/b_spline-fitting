@@ -65,7 +65,7 @@ using namespace Eigen;
 
 
 
-vector<double>  error_sum;//每一次迭代的误差和
+//vector<double>  error_sum;//每一次迭代的误差和
 int CSurfaceData::iter_num=1;
 
 
@@ -710,10 +710,7 @@ void CSurfaceData::query_isolated_range()
                     fi--;
 					setint left1=polymesh.property(f_index,*fi);
 					fi++;
-					setint right1=polymesh.property(f_index,*fi);
-					setint sum;
-					set_union(left1.begin(),left1.end(),right1.begin(),right1.end(),insert_iterator<setint>(sum,sum.begin()));
-                    polymesh2.property(f_index2,*fi2)=sum;
+                    polymesh2.property(f_index2,*fi2)=left1;
 
 				}
 				else if (k3%(unum-1)!=k2%(unum-1))//fi2不在待合并区域序号里,即fi2的u坐标不与k2所在的区域的相同
@@ -740,12 +737,9 @@ void CSurfaceData::query_isolated_range()
 				int k3=(*fi2).idx();
 				if (k3==k2)      //起始矩形面
 				{
-					setint left1=polymesh.property(f_index,*fi);
 					fi++;
 					setint right1=polymesh.property(f_index,*fi);
-					setint sum;
-					set_union(left1.begin(),left1.end(),right1.begin(),right1.end(),insert_iterator<setint>(sum,sum.begin()));
-					polymesh2.property(f_index2,*fi2)=sum;
+					polymesh2.property(f_index2,*fi2)=right1;
 
 
 				}
@@ -776,7 +770,7 @@ void CSurfaceData::query_isolated_range()
 			{
 				int k3=(*fi2).idx();
 				
-			    if (k3/(unum-1)!=k2/(unum-1))//fi2不在待合并区域序号里,即fi2的u坐标不与k2所在的区域的相同
+			    if (k3/(unum-1)!=k2/(unum-1))//fi2不在待合并区域序号里,即fi2的v坐标不与k2所在的区域的相同
 				{
 					polymesh2.property(f_index2,*fi2)=polymesh.property(f_index,*fi);
 				}
@@ -803,26 +797,21 @@ void CSurfaceData::query_isolated_range()
                 if (k3==k2)
                 {
 					advance(fi,unum-1); 
-					setint left1=polymesh.property(f_index,*fi); 
-					MyMesh::FaceIter fdown(polymesh.faces_begin());
-					advance(fdown,k3); 
-					setint right1=polymesh.property(f_index,*fdown); 
-					setint sum;
-					set_union(left1.begin(),left1.end(),right1.begin(),right1.end(),insert_iterator<setint>(sum,sum.begin()));
-					polymesh2.property(f_index2,*fi2)=sum;
+					setint upper1=polymesh.property(f_index,*fi); 
+					polymesh2.property(f_index2,*fi2)=upper1;
                 }
-				else if (k3/(unum-1)!=k2/(unum-1))//fi2不在待合并区域序号里,即fi2的u坐标不与k2所在的区域的相同
+				else if (k3/(unum-1)!=k2/(unum-1))//fi2不在待合并区域序号里,即fi2的v坐标不与k2所在的区域的相同
 				{
 					polymesh2.property(f_index2,*fi2)=polymesh.property(f_index,*fi);
 				}
 				else
 				{
-					setint left1=polymesh.property(f_index,*fi); 
+					setint upper1=polymesh.property(f_index,*fi); 
 					MyMesh::FaceIter fdown(polymesh.faces_begin());
 					advance(fdown,k3); 
-					setint right1=polymesh.property(f_index,*fdown); 
+					setint down1=polymesh.property(f_index,*fdown); 
 					setint sum;
-					set_union(left1.begin(),left1.end(),right1.begin(),right1.end(),insert_iterator<setint>(sum,sum.begin()));
+					set_union(upper1.begin(),upper1.end(),down1.begin(),down1.end(),insert_iterator<setint>(sum,sum.begin()));
 					polymesh2.property(f_index2,*fi2)=sum;
 				
 				}
@@ -838,466 +827,6 @@ void CSurfaceData::query_isolated_range()
 
 }
 
-/***********************************************************************
-void CSurfaceData::range_query2()
-{
-	polymesh.clear();
-	parameter1->compute_knots();
-	uknots=parameter1->getuknot();
-	vknots=parameter1->getvknot();
-	unum=uknots.size();
-	vnum=vknots.size();
-	//建立kd-tree
-	int					nPts;					// actual number of data points
-	ANNpointArray		dataPts;				// data points
-	int				maxPts= m_pOriginalMesh->n_vertices();			// maximum number of data points 				
-	dataPts = annAllocPts(maxPts, 2);			// allocate data points
-
-	nPts = 0;	
-	Mesh::VertexIter          v_it, v_end(m_pOriginalMesh->vertices_end());
-	for (v_it=m_pOriginalMesh->vertices_begin(); v_it!=v_end; ++v_it,nPts++)
-	{
-		dataPts[nPts][0]=m_pOriginalMesh->texcoord2D(*v_it)[0];
-		dataPts[nPts][1]=m_pOriginalMesh->texcoord2D(*v_it)[1];
-		assert(nPts==(*v_it).idx());
-	}
-	kdTree = new ANNkd_tree(					// build search structure
-		dataPts,					// the data points
-		nPts,						// number of points
-		2);						// dimension of space
-	// generate vertices
-	vector<vector<MyMesh::VertexHandle> > vhandle;
-	vhandle.resize(vnum,vector<MyMesh::VertexHandle>(unum));
-	for(int j=0;j<vnum;j++)
-		for (int i=0;i<unum;i++)
-		{
-			vhandle[j][i]=polymesh.add_vertex(MyMesh::Point(uknots[i],vknots[j],0.0));
-		}
-
-		// generate (quadrilateral) faces
-		std::vector<MyMesh::VertexHandle>  face_vhandles;
-		for(int j=0;j<vnum-1;j++)
-			for (int i=0;i<unum-1;i++)
-			{
-				face_vhandles.clear();
-				face_vhandles.push_back(vhandle[j][i]);
-				face_vhandles.push_back(vhandle[j][i+1]);
-				face_vhandles.push_back(vhandle[j+1][i+1]);
-				face_vhandles.push_back(vhandle[j+1][i]);
-				polymesh.add_face(face_vhandles);
-
-			}
-			//至此矩形面建立完毕
-
-			Mesh::FaceIter  f_it,f_end(m_pOriginalMesh->faces_end());
-			Mesh::FaceVertexIter fv_it2;
-
-			OpenMesh::FPropHandleT<vecint> v_index;  //增加每个面的内部点和边界点序号属性
-			polymesh.add_property(v_index,"v_index");
-
-			OpenMesh::VPropHandleT<Location_Type> v_location; //添加点属性
-			m_pOriginalMesh->add_property(v_location,"v_location");
-
-			OpenMesh::FPropHandleT<Location_Type> f_location; //添加面属性
-			m_pOriginalMesh->add_property(f_location,"f_location");
-
-			//先对每个面对积分
-			MyMesh::FaceIter f2_it,f2_end(polymesh.faces_end());  
-			MyMesh::FaceVertexIter  fv2_it;
-			for (f2_it=polymesh.faces_begin();f2_it!=f2_end;++f2_it)
-			{
-
-				fv2_it=polymesh.fv_iter(*f2_it);
-				double uknots_min=polymesh.point(*fv2_it)[0];
-				double vknots_min=polymesh.point(*fv2_it)[1];
-				fv2_it++;
-				fv2_it++;
-				double uknots_max=polymesh.point(*fv2_it)[0];
-				double vknots_max=polymesh.point(*fv2_it)[1];
-
-				ANNpoint			queryPt;				// query point
-				ANNidxArray			nnIdx;					// near neighbor indices
-				ANNdistArray		dists;					// near neighbor distances
-				double			     eps= 0.00001;			// error bound
-				queryPt = annAllocPt(2);					// allocate query point
-				nnIdx = new ANNidx[1];						// allocate near neigh indices
-				dists = new ANNdist[1];						// allocate near neighbor dists
-
-				queryPt[0]=(uknots_min+uknots_max)/2;
-				queryPt[1]=(vknots_min+vknots_max)/2;
-
-				kdTree->annkSearch(						// search
-					queryPt,						// query point
-					1,								// number of near neighbors
-					nnIdx,							// nearest neighbors (returned)
-					dists,							// distance (returned)
-					eps);							// error bound
-				int idx=nnIdx[0];
-				delete [] nnIdx;							// clean things up
-				delete [] dists;
-				Mesh::VertexHandle  p=m_pOriginalMesh->vertex_handle(idx);								
-				//扩散过程，求矩形区域包含的内部三角形，跨越三角形，外部三角形
-				Mesh::VertexIter   v_it,v_end(m_pOriginalMesh->vertices_end());
-				for (v_it=m_pOriginalMesh->vertices_begin();v_it!=v_end;++v_it)
-				{
-					m_pOriginalMesh->property(v_location,*v_it)=unknown;
-
-				}
-
-				for (f_it=m_pOriginalMesh->faces_begin(); f_it!=f_end; ++f_it)
-				{
-					m_pOriginalMesh->property(f_location,*f_it)=unknown;
-				}
-
-				TexCoord  p2=m_pOriginalMesh->texcoord2D(p);
-
-				if(uknots_min<=p2[0]&&p2[0]<=uknots_max&&p2[1]>=vknots_min&&p2[1]<=vknots_max)	
-				{
-					m_pOriginalMesh->property(v_location,p)=inside;
-                     int turn=0;
-					vector<int>  v1;//遍历一轮的顶点
-					v1.push_back(p.idx());
-					polymesh.property(v_index,*f2_it).push_back(p.idx());
-					vector<int>  v4;//存储所有的外部顶点序号
-					do 
-					{
-						vector<int> v3;//存储新一轮的顶点序号
-					
-						for (vector<int>::iterator  v2=v1.begin();v2!=v1.end();++v2)
-						{
-							for(Mesh::VertexFaceIter vf_it=m_pOriginalMesh->vf_iter(m_pOriginalMesh->vertex_handle(*v2));vf_it.is_valid();++vf_it)
-							{
-								if (m_pOriginalMesh->property(f_location,*vf_it)==unknown)
-								{
-									int inside_sum=0,outside_sum=0,boundary_sum=0;
-									for (Mesh::FaceVertexIter  fv_it=m_pOriginalMesh->fv_iter(*vf_it);fv_it.is_valid();++fv_it)
-									{
-
-										if (m_pOriginalMesh->property(v_location,*fv_it)==unknown)
-										{
-											//判定位置
-											TexCoord  p3=m_pOriginalMesh->texcoord2D(*fv_it);
-											if ((abs(p3[0]-uknots_min)<=EPSILON2 &&(p3[1]>=vknots_min&&p3[1]<=vknots_max))
-												||(abs(p3[0]-uknots_max)<=EPSILON2&&(p3[1]>=vknots_min&&p3[1]<=vknots_max))
-												||(abs(p3[1]-vknots_min)<=EPSILON2&&(p3[0]>=uknots_min&&p3[0]<=uknots_max))
-												||(abs(p3[1]-vknots_max)<=EPSILON2&&(p3[0]>=uknots_min&&p3[0]<=uknots_max)))
-											{
-												m_pOriginalMesh->property(v_location,*fv_it)=boundary;
-												boundary_sum++;
-												v3.push_back((*fv_it).idx());
-												polymesh.property(v_index,*f2_it).push_back((*fv_it).idx());
-											}
-											else if (p3[0]>=uknots_min&&p3[0]<=uknots_max&&p3[1]>=vknots_min&&p3[1]<=vknots_max)
-											{
-												m_pOriginalMesh->property(v_location,*fv_it)=inside;
-												inside_sum++;
-												v3.push_back((*fv_it).idx());
-												polymesh.property(v_index,*f2_it).push_back((*fv_it).idx());
-											}  
-											else
-											{
-												m_pOriginalMesh->property(v_location,*fv_it)=outside;
-												outside_sum++;
-												v4.push_back((*fv_it).idx());
-											}
-
-										}
-										else if (m_pOriginalMesh->property(v_location,*fv_it)==inside)
-										{
-											inside_sum++;
-										}
-										else if (m_pOriginalMesh->property(v_location,*fv_it)==outside)
-										{
-											outside_sum++;
-										}
-										else
-										{
-											boundary_sum++;						
-										}
-									}
-									//判断三角形的位置
-									assert(outside_sum+boundary_sum+inside_sum==3);
-
-									if (inside_sum==3)
-									{
-										m_pOriginalMesh->property(f_location,*vf_it)=inside;
-									} 
-									else if (inside_sum==2)
-									{
-										if (boundary_sum==1)
-										{
-											m_pOriginalMesh->property(f_location,*vf_it)=inside;
-
-										}
-										else
-										{
-											m_pOriginalMesh->property(f_location,*vf_it)=boundary;									
-
-										}
-
-									}
-									else if (inside_sum==1)
-									{
-										if (boundary_sum==2)
-										{
-											m_pOriginalMesh->property(f_location,*vf_it)=inside;
-
-										}
-										else //1-0-2,1-1-1
-										{
-											m_pOriginalMesh->property(f_location,*vf_it)=boundary;
-
-										}
-									}
-									else
-									{
-										assert(inside_sum==0);
-										if (boundary_sum==3)
-										{
-											m_pOriginalMesh->property(f_location,*vf_it)=inside;
-
-										}
-										else //0-2-1,0-1-2,0-0-3
-										{
-											m_pOriginalMesh->property(f_location,*vf_it)=outside;
-										}
-
-									}
-								}
-							}
-
-						}
-						if (turn==0)
-						{
-						v1.assign(v3.begin(),v3.end());
-						}
-						if (turn>0)
-						{
-							turn++;
-							v1.assign(v4.begin(),v4.end());
-							v1.insert(v1.end(),v3.begin(),v3.end());
-							v4.clear();
-						}
-						if (v1.empty())
-						{
-							if (turn>0)
-							   break;
-							//assert(turn==0);
-							v1.assign(v4.begin(),v4.end());
-							v4.clear();
-							turn++;
-						}
-						 
-					} while (turn<20);
-
-			 }
-				else
-			 {
-				 cout<<"需要的序号:"<<(*f2_it).idx()<<endl;
-				 m_pOriginalMesh->property(v_location,p)=outside;
-				 int turn=0;
-				 vector<int>  v1;//遍历一轮的顶点
-				 v1.push_back(p.idx());
-				 do 
-				 {
-					 vector<int> v3;//存储新一轮的顶点序号
-					 for (vector<int>::iterator  v2=v1.begin();v2!=v1.end();++v2)
-					 {
-						 for(Mesh::VertexFaceIter vf_it=m_pOriginalMesh->vf_iter(m_pOriginalMesh->vertex_handle(*v2));vf_it.is_valid();++vf_it)
-						 {
-							 if (m_pOriginalMesh->property(f_location,*vf_it)==unknown)
-							 {
-								 int inside_sum=0,outside_sum=0,boundary_sum=0;
-								 for (Mesh::FaceVertexIter  fv_it=m_pOriginalMesh->fv_iter(*vf_it);fv_it.is_valid();++fv_it)
-								 {
-
-									 if (m_pOriginalMesh->property(v_location,*fv_it)==unknown)
-									 {
-										 //判定位置
-										 TexCoord  p3=m_pOriginalMesh->texcoord2D(*fv_it);
-										 if ((abs(p3[0]-uknots_min)<=EPSILON2 &&(p3[1]>=vknots_min&&p3[1]<=vknots_max))
-											 ||(abs(p3[0]-uknots_max)<=EPSILON2&&(p3[1]>=vknots_min&&p3[1]<=vknots_max))
-											 ||(abs(p3[1]-vknots_min)<=EPSILON2&&(p3[0]>=uknots_min&&p3[0]<=uknots_max))
-											 ||(abs(p3[1]-vknots_max)<=EPSILON2&&(p3[0]>=uknots_min&&p3[0]<=uknots_max)))
-										 {
-											 m_pOriginalMesh->property(v_location,*fv_it)=boundary;
-											 boundary_sum++;
-											 v3.push_back((*fv_it).idx());
-											 polymesh.property(v_index,*f2_it).push_back((*fv_it).idx());
-										 }
-										 else if (p3[0]>=uknots_min&&p3[0]<=uknots_max&&p3[1]>=vknots_min&&p3[1]<=vknots_max)
-										 {
-											 m_pOriginalMesh->property(v_location,*fv_it)=inside;
-											 inside_sum++;
-											 v3.push_back((*fv_it).idx());
-											 polymesh.property(v_index,*f2_it).push_back((*fv_it).idx());
-										 }  
-										 else
-										 {
-											 m_pOriginalMesh->property(v_location,*fv_it)=outside;
-											 outside_sum++;
-											 v3.push_back((*fv_it).idx());
-										 }
-
-									 }
-									 else if (m_pOriginalMesh->property(v_location,*fv_it)==inside)
-									 {
-										 inside_sum++;
-									 }
-									 else if (m_pOriginalMesh->property(v_location,*fv_it)==outside)
-									 {
-										 outside_sum++;
-									 }
-									 else
-									 {
-										 boundary_sum++;						
-									 }
-								 }
-								 //判断三角形的位置
-
-								 assert(outside_sum+boundary_sum+inside_sum==3);
-
-								 if (inside_sum==3)
-								 {
-									 m_pOriginalMesh->property(f_location,*vf_it)=inside;
-								 } 
-								 else if (inside_sum==2)
-								 {
-									 if (boundary_sum==1)
-									 {
-										 m_pOriginalMesh->property(f_location,*vf_it)=inside;
-
-									 }
-									 else
-									 {
-										 m_pOriginalMesh->property(f_location,*vf_it)=boundary;									
-
-									 }
-
-								 }
-								 else if (inside_sum==1)
-								 {
-									 if (boundary_sum==2)
-									 {
-										 m_pOriginalMesh->property(f_location,*vf_it)=inside;
-
-									 }
-									 else //1-0-2,1-1-1
-									 {
-										 m_pOriginalMesh->property(f_location,*vf_it)=boundary;
-
-									 }
-								 }
-								 else
-								 {
-									 assert(inside_sum==0);
-									 if (boundary_sum==3)
-									 {
-										 m_pOriginalMesh->property(f_location,*vf_it)=inside;
-
-									 }
-									 else //0-2-1,0-1-2,0-0-3
-									 {
-										 m_pOriginalMesh->property(f_location,*vf_it)=outside;
-									 }
-
-								 }
-							 }
-						 }
-
-					 }
-					 v1.assign(v3.begin(),v3.end());
-					 if (v1.empty())
-					 {
-						 break;
-					 }
-					 turn++;
-
-				 } while (turn<20);
-
-				 vecint  vindex2=polymesh.property(v_index,*f2_it);
-				 if (vindex2.empty())
-				 {
-					 polymesh.property(v_index,*f2_it).push_back(-1);
-				 }
-				}
-			}
-			//填充horizon_index,vertical_index			vertical_index.clear();
-			horizon_index.clear();
-			vertical_index.clear();
-			vertical_index.resize(unum-1);
-			horizon_index.resize(vnum-1);
-			cout<<"每列面序号输出："<<endl;
-			for (int i=0;i<unum-1;i++)
-			{
-				cout<<"第"<<i+1<<"列序号为:"<<endl;
-				for (int j=0;j<vnum-1;j++)
-				{
-					int index=i+(unum-1)*j;
-					cout<<index<<" ";
-					MyMesh::FaceHandle f_h=polymesh.face_handle(index);
-					vecint  vindex=polymesh.property(v_index,f_h);
-					if (i==1&&j==0)
-					{
-						test.assign(vindex.begin(),vindex.end());
-					}
-					if (vindex[0]==-1)
-					{
-						continue;
-
-					}
-					copy(vindex.begin(),vindex.end(),back_inserter(vertical_index[i]));
-				}
-				cout<<endl;
-				sort(vertical_index[i].begin(),vertical_index[i].end());
-				vertical_index[i].erase( std::unique( vertical_index[i].begin(), vertical_index[i].end()), vertical_index[i].end() );
-			}
-
-			//if (label==2)
-			//{
-			//	m_pOriginalMesh->request_vertex_colors(); 
-			//	if (!m_pOriginalMesh->has_vertex_colors())
-			//		return;
-			//	for (Mesh::VertexIter tv=m_pOriginalMesh->vertices_begin();tv!=m_pOriginalMesh->vertices_end();++tv)
-			//	{
-			//		m_pOriginalMesh->set_color(*tv,Mesh::Color(120,120,120));
-			//	}	
-			//	MyMesh::FaceHandle f_h=polymesh.face_handle(5);
-			//	vecint  vindex=polymesh.property(v_index,f_h);
-			//	//vecint  vindex=vertical_index[1];
-			//	for(vecint::iterator tv2=vindex.begin();tv2!=vindex.end();++tv2)
-			//	{
-			//		Mesh::VertexHandle pv=m_pOriginalMesh->vertex_handle(*tv2);
-			//		m_pOriginalMesh->set_color(pv,Mesh::Color(255,0,0));
-			//	
-			//	}
-			//}
-			cout<<"每行面序号输出："<<endl;
-			for (int i=0;i<vnum-1;i++)
-			{
-				cout<<"第"<<i+1<<"行序号为:"<<endl;
-				for (int j=0;j<unum-1;j++)
-				{
-					int index=(unum-1)*i+j;
-					cout<<index<<" ";
-					MyMesh::FaceHandle f_h=polymesh.face_handle(index);
-					vecint  vindex=polymesh.property(v_index,f_h);
-					if (vindex[0]==-1)
-					{
-						continue;
-					}
-					copy(vindex.begin(),vindex.end(),back_inserter(horizon_index[i]));
-				}
-				cout<<endl;
-				sort(horizon_index[i].begin(),horizon_index[i].end());
-				horizon_index[i].erase( std::unique( horizon_index[i].begin(),horizon_index[i].end()), horizon_index[i].end() );
-
-			}
-
-
-
-}
-*****************************************************************************/
 bool CSurfaceData::add_knots()
 {
 
@@ -1835,10 +1364,9 @@ void CSurfaceData::clear_data()
 		delete m_pOriginalMesh;
 		m_pOriginalMesh = NULL;
 	}
-	if(m_pFittedMesh!=NULL)
+	if(m_pFittedMesh!=NULL) //m_pFittedMesh不是在这里分配的，它是由bsurface分配的，理应由它销毁
 	{
 		m_pFittedMesh->clear();
-		delete m_pFittedMesh;
 		m_pFittedMesh = NULL;
 	}
 	if(m_pErrorMesh!=NULL)
@@ -1983,7 +1511,7 @@ int CSurfaceData::get_mesh_vertex_num()
 {
 	if(m_pOriginalMesh!=NULL)
 	{
-		return m_pOriginalMesh->n_vertices();
+		return sample_num;
 	}
 	return -1;
 }
@@ -2308,7 +1836,7 @@ void CSurfaceData::modification()
 {
 	//-------------------------------------------------------------删除过密的节点线
 	//------------------------------------------------------处理uknots
-	double  epsi=pow(sqrt(double(m_pOriginalMesh->n_vertices())),-1);
+	double  epsi=pow(sqrt(double(sample_num)),-1);
 	viterator uiter=uknots.begin();
 	advance(uiter,1);
 	//u[1]确定
@@ -2386,6 +1914,8 @@ void CSurfaceData::modification()
 	}
 	sort(uknots.begin(),uknots.end());
 	sort(vknots.begin(),vknots.end());
+	unum=uknots.size();
+	vnum=vknots.size();
 	//------------------------------------------------------找到不含一个参数点的矩形区域，并删除相邻的节点线
 	update_polymesh_and_query();
 	query_success=false;
@@ -2481,32 +2011,24 @@ bool   CSurfaceData::adjust_knots_by_curvature()
 	  unum=uknots.size();
 	  vnum=vknots.size();
 	  modification();
-	  unum=uknots.size();
-	  vnum=vknots.size();
-	 // range_query2();
-	  unum=uknots.size();
+	/*  unum=uknots.size();
 	  vnum=vknots.size();
 	  sort(uknots.begin(),uknots.end());
-	  sort(vknots.begin(),vknots.end());
+	  sort(vknots.begin(),vknots.end());*/
 	  parameter1->setnum(uknots.size(),vknots.size());
 	  parameter1->setm(uknots.size()+parameter1->getp()-2);
 	  parameter1->setn(vknots.size()+parameter1->getq()-2);
 	  parameter1->setuknots(uknots);
 	  parameter1->setvknots(vknots);
-	 /* update_polymesh();*/
+	  //-------------------------------------------------------------检测曲率积分的误差，并显示在knotsSubWindow中
+	  update_polymesh();
 	  parameter1->iteration_ok=true;
 
-	/*  ofstream  result("result.txt");
-	  for (vector<double>::iterator p=error_sum.begin();p!=error_sum.end();++p)
-	  {
-		  result<<*p<<endl;
-	  }
-	  error_sum.clear();*/
- //  cout<<"初始的结果是"<<"p:"<<parameter1->getp()<<"q:"<<parameter1->getq()<<"m:"<<parameter1->getm()<<"n:"<<parameter1->getn()<<endl;
-//   result<<"初始的结果是"<<"p:"<<parameter1->getp()<<"q:"<<parameter1->getq()<<"m:"<<parameter1->getm()<<"n:"<<parameter1->getn()<<endl;
+      cout<<"初始的结果是"<<"p:"<<parameter1->getp()<<"q:"<<parameter1->getq()<<"m:"<<parameter1->getm()<<"n:"<<parameter1->getn()<<endl;
+
    //计时结束
-   QueryPerformanceCounter(&time_over); 
-   cout<<"依据曲率修订节点线耗时:"<<((time_over.QuadPart-time_start.QuadPart)/dqFreq)<<"s"<<endl;//单位为秒，精度为1000 000/（cpu主频）微秒
+    QueryPerformanceCounter(&time_over); 
+    cout<<"依据曲率修订节点线耗时:"<<((time_over.QuadPart-time_start.QuadPart)/dqFreq)<<"s"<<endl;//单位为秒，精度为1000 000/（cpu主频）微秒
 	return true;
 }
 bool CSurfaceData::adjust_knots_by_fitting_error()
@@ -2675,10 +2197,10 @@ bool CSurfaceData::adjust_knots_by_fitting_error()
 	vknots.assign(temporary_vknot.begin(),temporary_vknot.end());
 
 	
-	for (vector<double>::iterator p=error_sum.begin();p!=error_sum.end();++p)
+	/*for (vector<double>::iterator p=error_sum.begin();p!=error_sum.end();++p)
 	{
 		result<<*p<<endl;
-	}
+	}*/
 	unum=uknots.size();
 	vnum=vknots.size();
 	parameter1->setnum(uknots.size(),vknots.size());
@@ -2698,7 +2220,7 @@ bool CSurfaceData::adjust_knots_by_fitting_error()
 	parameter1->setuknots(uknots);
 	parameter1->setvknots(vknots);
 	parameter1->iteration_ok=true;
-	error_sum.clear();
+	//error_sum.clear();
 	cout<<"最终的结果是"<<"p:"<<parameter1->getp()<<"q:"<<parameter1->getq()<<"m:"<<parameter1->getm()<<"n:"<<parameter1->getn()<<endl;
 	result<<"最终的结果是"<<"p:"<<parameter1->getp()<<"q:"<<parameter1->getq()<<"m:"<<parameter1->getm()<<"n:"<<parameter1->getn()<<endl;
 //计时结束
@@ -2710,35 +2232,12 @@ bool CSurfaceData::adjust_knots_by_fitting_error()
 
 void CSurfaceData::update_polymesh()
 {
-	polymesh.clear();
-	// generate vertices
-	vector<vector<MyMesh::VertexHandle> > vhandle;
-	vhandle.resize(vnum,vector<MyMesh::VertexHandle>(unum));
-	for(int j=0;j<vnum;j++)
-		for (int i=0;i<unum;i++)
-		{
-			vhandle[j][i]=polymesh.add_vertex(MyMesh::Point(uknots[i],vknots[j],0.0));
-		}
-
-		// generate (quadrilateral) faces
-		std::vector<MyMesh::VertexHandle>  face_vhandles;
-		for(int j=0;j<vnum-1;j++)
-			for (int i=0;i<unum-1;i++)
-			{
-				face_vhandles.clear();
-				face_vhandles.push_back(vhandle[j][i]);
-				face_vhandles.push_back(vhandle[j][i+1]);
-				face_vhandles.push_back(vhandle[j+1][i+1]);
-				face_vhandles.push_back(vhandle[j+1][i]);
-				polymesh.add_face(face_vhandles);
-
-			}
-			//至此矩形面建立完毕
+	
+			update_polymesh_and_query();
+			//---------------------------------------------------------------------------------------  end 
 			polymesh.request_face_colors(); 
 			if (!polymesh.has_face_colors())
 				return;
-			Mesh::FaceIter  f_it,f_end(m_pOriginalMesh->faces_end());
-			Mesh::FaceVertexIter fv_it2;
 
 			OpenMesh::FPropHandleT<double> f_area;  //增加每个面的曲率面积属性
 			polymesh.add_property(f_area,"f_area");
@@ -2746,422 +2245,32 @@ void CSurfaceData::update_polymesh()
 			OpenMesh::FPropHandleT<double> f_error;  //增加每个面的曲率误差属性
 			polymesh.add_property(f_error,"f_error");
 
-			OpenMesh::VPropHandleT<Location_Type> v_location; //添加点属性
-			m_pOriginalMesh->get_property_handle(v_location,"v_location");
-
-			OpenMesh::FPropHandleT<Location_Type> f_location; //添加面属性
-			m_pOriginalMesh->get_property_handle(f_location,"f_location");
-
-
 			for (MyMesh::FaceIter f2_it=polymesh.faces_begin();f2_it!=polymesh.faces_end();++f2_it)
 			{
 				polymesh.property(f_area,*f2_it)=0.0;
 			}
 
-			OpenMesh::FPropHandleT<double> f_mean_curvature2;
-			m_pOriginalMesh->get_property_handle(f_mean_curvature2,"f_mean_curvature");
+			OpenMesh::FPropHandleT<setint> f_index;  //增加每个面包含的三角形序号属性
+			polymesh.get_property_handle(f_index,"f_index");
 
-			//先对每个面对积分
-			MyMesh::FaceIter f2_it,f2_end(polymesh.faces_end());  
-			MyMesh::FaceVertexIter  fv2_it;
-			for (f2_it=polymesh.faces_begin();f2_it!=f2_end;++f2_it)
+
+			OpenMesh::FPropHandleT<double> tri_integral; //获取三角形面积分属性
+			m_pOriginalMesh->get_property_handle(tri_integral,"tri_integral"); 
+
+			
+			//-------------------------------------------------------------------------------------------------
+			//计算面积分
+			MyMesh::FaceIter f_it,f_end(polymesh.faces_end());
+			for (f_it=polymesh.faces_begin();f_it!=f_end;++f_it)
 			{
-				polymesh.property(f_area,*f2_it)=0.0;
-				fv2_it=polymesh.fv_iter(*f2_it);
-				double uknots_min=polymesh.point(*fv2_it)[0];
-				double vknots_min=polymesh.point(*fv2_it)[1];
-				fv2_it++;
-				fv2_it++;
-				double uknots_max=polymesh.point(*fv2_it)[0];
-				double vknots_max=polymesh.point(*fv2_it)[1];
-
-				ANNpoint			queryPt;				// query point
-				ANNidxArray			nnIdx;					// near neighbor indices
-				ANNdistArray		dists;					// near neighbor distances
-				double			     eps= 0.00001;			// error bound
-				queryPt = annAllocPt(2);					// allocate query point
-				nnIdx = new(std::nothrow) ANNidx[1];						// allocate near neigh indices
-				dists = new(std::nothrow) ANNdist[1];						// allocate near neighbor dists
-
-				queryPt[0]=(uknots_min+uknots_max)/2;
-				queryPt[1]=(vknots_min+vknots_max)/2;
-
-				kdTree->annkSearch(						// search
-					queryPt,						// query point
-					1,								// number of near neighbors
-					nnIdx,							// nearest neighbors (returned)
-					dists,							// distance (returned)
-					eps);							// error bound
-				int idx=nnIdx[0];
-				delete [] nnIdx;							// clean things up
-				delete [] dists;
-				Mesh::VertexHandle  p=m_pOriginalMesh->vertex_handle(idx);								
-				//扩散过程，求矩形区域包含的内部三角形，跨越三角形，外部三角形
-				Mesh::VertexIter   v_it,v_end(m_pOriginalMesh->vertices_end());
-				for (v_it=m_pOriginalMesh->vertices_begin();v_it!=v_end;++v_it)
+				setint tri_set=polymesh.property(f_index,*f_it);
+				for (setint::iterator s_it=tri_set.begin();s_it!=tri_set.end();++s_it)
 				{
-					m_pOriginalMesh->property(v_location,*v_it)=unknown;
-
-				}
-
-				for (f_it=m_pOriginalMesh->faces_begin(); f_it!=f_end; ++f_it)
-				{
-					m_pOriginalMesh->property(f_location,*f_it)=unknown;
-				}
-
-				TexCoord  p2=m_pOriginalMesh->texcoord2D(p);
-
-				if(uknots_min<=p2[0]&&p2[0]<=uknots_max&&p2[1]>=vknots_min&&p2[1]<=vknots_max)
-				{
-					m_pOriginalMesh->property(v_location,p)=inside;
-					vector<int>  v1;//遍历一轮的顶点
-					v1.push_back(p.idx());
-					int turn=0;
-                    vector<int>  v4;//存储所有的外部顶点序号
-					do 
-					{
-						vector<int> v3;//存储新一轮的顶点序号
-						for (vector<int>::iterator  v2=v1.begin();v2!=v1.end();++v2)
-						{
-							for(Mesh::VertexFaceIter vf_it=m_pOriginalMesh->vf_iter(m_pOriginalMesh->vertex_handle(*v2));vf_it.is_valid();++vf_it)
-							{
-								if (m_pOriginalMesh->property(f_location,*vf_it)==unknown)
-								{
-									int inside_sum=0,outside_sum=0,boundary_sum=0;
-									for (Mesh::FaceVertexIter  fv_it=m_pOriginalMesh->fv_iter(*vf_it);fv_it.is_valid();++fv_it)
-									{
-
-										if (m_pOriginalMesh->property(v_location,*fv_it)==unknown)
-										{
-											//判定位置
-											TexCoord  p3=m_pOriginalMesh->texcoord2D(*fv_it);
-											if ((abs(p3[0]-uknots_min)<=EPSILON2 &&(p3[1]>=vknots_min&&p3[1]<=vknots_max))
-												||(abs(p3[0]-uknots_max)<=EPSILON2&&(p3[1]>=vknots_min&&p3[1]<=vknots_max))
-												||(abs(p3[1]-vknots_min)<=EPSILON2&&(p3[0]>=uknots_min&&p3[0]<=uknots_max))
-												||(abs(p3[1]-vknots_max)<=EPSILON2&&(p3[0]>=uknots_min&&p3[0]<=uknots_max)))
-											{
-												m_pOriginalMesh->property(v_location,*fv_it)=boundary;
-												boundary_sum++;
-												v3.push_back((*fv_it).idx());
-
-											}
-											else if (p3[0]>=uknots_min&&p3[0]<=uknots_max&&p3[1]>=vknots_min&&p3[1]<=vknots_max)
-											{
-												m_pOriginalMesh->property(v_location,*fv_it)=inside;
-												inside_sum++;
-												v3.push_back((*fv_it).idx());
-
-											}  
-											else
-											{
-												m_pOriginalMesh->property(v_location,*fv_it)=outside;
-												outside_sum++;
-												v4.push_back((*fv_it).idx());
-											}
-
-										}
-										else if (m_pOriginalMesh->property(v_location,*fv_it)==inside)
-										{
-											inside_sum++;
-										}
-										else if (m_pOriginalMesh->property(v_location,*fv_it)==outside)
-										{
-											outside_sum++;
-										}
-										else
-										{
-											boundary_sum++;						
-										}
-									}
-									//判断三角形的位置
-									assert(outside_sum+boundary_sum+inside_sum==3);
-									double t22=m_pOriginalMesh->property(f_mean_curvature2,*vf_it);
-									//求解三角形面积
-									TexCoord A,B,C;
-									fv_it2=m_pOriginalMesh->fv_iter(*vf_it);
-									A=m_pOriginalMesh->texcoord2D(*fv_it2);
-									++fv_it2;
-									B=m_pOriginalMesh->texcoord2D(*fv_it2);
-									++fv_it2;
-									C=m_pOriginalMesh->texcoord2D(*fv_it2);
-									double  Area=abs(CGAL::area(Point_2(A[0],A[1]),Point_2(B[0],B[1]),Point_2(C[0],C[1])));
-
-									if (inside_sum==3)
-									{
-										m_pOriginalMesh->property(f_location,*vf_it)=inside;
-										polymesh.property(f_area,*f2_it)+=Area*t22;		 
-
-									} 
-									else if (inside_sum==2)
-									{
-										if (boundary_sum==1)
-										{
-											m_pOriginalMesh->property(f_location,*vf_it)=inside;
-											polymesh.property(f_area,*f2_it)+=Area*t22;	
-										}
-										else
-										{
-											m_pOriginalMesh->property(f_location,*vf_it)=boundary;
-											Triangle_2  tri(Point_2 (A[0],A[1]),Point_2 (B[0],B[1]),Point_2 (C[0],C[1]));
-											Iso_rectangle_2  rec(uknots_min,vknots_min,uknots_max,vknots_max);
-											if(intersection_rt(tri,rec,&Area))
-											{
-												polymesh.property(f_area,*f2_it)+=Area*t22;		
-											}
-
-
-										}
-
-									}
-									else if (inside_sum==1)
-									{
-										if (boundary_sum==2)
-										{
-											m_pOriginalMesh->property(f_location,*vf_it)=inside;
-											polymesh.property(f_area,*f2_it)+=Area*t22;	
-										}
-										else //1-0-2,1-1-1
-										{
-											m_pOriginalMesh->property(f_location,*vf_it)=boundary;
-											Triangle_2  tri(Point_2 (A[0],A[1]),Point_2 (B[0],B[1]),Point_2 (C[0],C[1]));
-											Iso_rectangle_2  rec(uknots_min,vknots_min,uknots_max,vknots_max);
-											if(intersection_rt(tri,rec,&Area))
-											{
-												polymesh.property(f_area,*f2_it)+=Area*t22;		
-											}
-
-										}
-									}
-									else
-									{
-										assert(inside_sum==0);
-										if (boundary_sum==3)
-										{
-											m_pOriginalMesh->property(f_location,*vf_it)=inside;
-											polymesh.property(f_area,*f2_it)+=Area*t22;	
-										}
-										else //0-2-1,0-1-2，0-0-3
-										{
-
-											double  tri_umin=(A[0]<=B[0]?A[0]:(B[0]<=C[0]?B[0]:C[0]));
-											double  tri_umax=(A[0]<=B[0]?B[0]:(A[0]<=C[0]?C[0]:A[0]));
-											double  tri_vmin=(A[1]<=B[1]?A[1]:(B[1]<=C[1]?B[1]:C[1]));
-											double  tri_vmax=(A[1]<=B[1]?B[1]:(A[1]<=C[1]?C[1]:A[1]));
-											if(tri_umax<=uknots_min||tri_umin>=uknots_max||tri_vmin>=vknots_max||tri_vmax<=vknots_min)
-											{
-												m_pOriginalMesh->property(f_location,*vf_it)=outside;
-											}
-											else
-											{
-												Triangle_2  tri(Point_2 (A[0],A[1]),Point_2 (B[0],B[1]),Point_2 (C[0],C[1]));
-												Iso_rectangle_2  rec(uknots_min,vknots_min,uknots_max,vknots_max);
-												if(intersection_rt(tri,rec,&Area))
-												{
-													polymesh.property(f_area,*f2_it)+=Area*t22;		
-												}
-												m_pOriginalMesh->property(f_location,*vf_it)=boundary;
-											}
-										}
-
-									}
-								}
-							}
-
-						}
-						if (turn==0)
-						{
-							v1.assign(v3.begin(),v3.end());
-						}
-						if (turn>0)
-						{
-							turn++;
-							v1.assign(v4.begin(),v4.end());
-							v1.insert(v1.end(),v3.begin(),v3.end());
-							v4.clear();
-						}
-						if (v1.empty())
-						{
-							if (turn>0)
-								break;
-							//assert(turn==0);
-							v1.assign(v4.begin(),v4.end());
-							v4.clear();
-							turn++;
-						}
-
-					} while (turn<20);
-
-				}
-				else
-				{
-					m_pOriginalMesh->property(v_location,p)=outside;
-
-					vector<int>  v1;//遍历一轮的顶点
-					v1.push_back(p.idx());
-
-					int turn=0;//扩延的次数
-					do 
-					{
-						vector<int> v3;//存储新一轮的顶点序号
-						for (vector<int>::iterator  v2=v1.begin();v2!=v1.end();++v2)
-						{
-							for(Mesh::VertexFaceIter vf_it=m_pOriginalMesh->vf_iter(m_pOriginalMesh->vertex_handle(*v2));vf_it.is_valid();++vf_it)
-							{
-								if (m_pOriginalMesh->property(f_location,*vf_it)==unknown)
-								{
-									int inside_sum=0,outside_sum=0,boundary_sum=0;
-									for (Mesh::FaceVertexIter  fv_it=m_pOriginalMesh->fv_iter(*vf_it);fv_it.is_valid();++fv_it)
-									{
-
-										if (m_pOriginalMesh->property(v_location,*fv_it)==unknown)
-										{
-											//判定位置
-											TexCoord  p3=m_pOriginalMesh->texcoord2D(*fv_it);
-											if ((abs(p3[0]-uknots_min)<=EPSILON2 &&(p3[1]>=vknots_min&&p3[1]<=vknots_max))
-												||(abs(p3[0]-uknots_max)<=EPSILON2&&(p3[1]>=vknots_min&&p3[1]<=vknots_max))
-												||(abs(p3[1]-vknots_min)<=EPSILON2&&(p3[0]>=uknots_min&&p3[0]<=uknots_max))
-												||(abs(p3[1]-vknots_max)<=EPSILON2&&(p3[0]>=uknots_min&&p3[0]<=uknots_max)))
-											{
-												m_pOriginalMesh->property(v_location,*fv_it)=boundary;
-												boundary_sum++;
-												v3.push_back((*fv_it).idx());
-											}
-											else if (p3[0]>=uknots_min&&p3[0]<=uknots_max&&p3[1]>=vknots_min&&p3[1]<=vknots_max)
-											{
-												m_pOriginalMesh->property(v_location,*fv_it)=inside;
-												inside_sum++;
-												v3.push_back((*fv_it).idx());
-											}  
-											else
-											{
-												m_pOriginalMesh->property(v_location,*fv_it)=outside;
-												outside_sum++;
-												v3.push_back((*fv_it).idx());
-											}
-
-										}
-										else if (m_pOriginalMesh->property(v_location,*fv_it)==inside)
-										{
-											inside_sum++;
-										}
-										else if (m_pOriginalMesh->property(v_location,*fv_it)==outside)
-										{
-											outside_sum++;
-										}
-										else
-										{
-											boundary_sum++;						
-										}
-									}
-									//判断三角形的位置
-									assert(outside_sum+boundary_sum+inside_sum==3);
-									double t22=m_pOriginalMesh->property(f_mean_curvature2,*vf_it);
-									//求解三角形面积
-									TexCoord A,B,C;
-									fv_it2=m_pOriginalMesh->fv_iter(*vf_it);
-									A=m_pOriginalMesh->texcoord2D(*fv_it2);
-									++fv_it2;
-									B=m_pOriginalMesh->texcoord2D(*fv_it2);
-									++fv_it2;
-									C=m_pOriginalMesh->texcoord2D(*fv_it2);
-									double  Area=abs(CGAL::area(Point_2(A[0],A[1]),Point_2(B[0],B[1]),Point_2(C[0],C[1])));
-
-									if (inside_sum==3)
-									{
-										m_pOriginalMesh->property(f_location,*vf_it)=inside;
-										polymesh.property(f_area,*f2_it)+=Area*t22;		 
-
-									} 
-									else if (inside_sum==2)
-									{
-										if (boundary_sum==1)
-										{
-											m_pOriginalMesh->property(f_location,*vf_it)=inside;
-											polymesh.property(f_area,*f2_it)+=Area*t22;	
-										}
-										else
-										{
-											m_pOriginalMesh->property(f_location,*vf_it)=boundary;
-											Triangle_2  tri(Point_2 (A[0],A[1]),Point_2 (B[0],B[1]),Point_2 (C[0],C[1]));
-											Iso_rectangle_2  rec(uknots_min,vknots_min,uknots_max,vknots_max);
-											if(intersection_rt(tri,rec,&Area))
-											{
-												polymesh.property(f_area,*f2_it)+=Area*t22;		
-											}
-
-										}
-
-									}
-									else if (inside_sum==1)
-									{
-										if (boundary_sum==2)
-										{
-											m_pOriginalMesh->property(f_location,*vf_it)=inside;
-											polymesh.property(f_area,*f2_it)+=Area*t22;	
-										}
-										else //1-0-2,1-1-1
-										{
-											m_pOriginalMesh->property(f_location,*vf_it)=boundary;
-											Triangle_2  tri(Point_2 (A[0],A[1]),Point_2 (B[0],B[1]),Point_2 (C[0],C[1]));
-											Iso_rectangle_2  rec(uknots_min,vknots_min,uknots_max,vknots_max);
-											if(intersection_rt(tri,rec,&Area))
-											{
-												polymesh.property(f_area,*f2_it)+=Area*t22;		
-											}
-
-										}
-									}
-									else
-									{
-										assert(inside_sum==0);
-										if (boundary_sum==3)
-										{
-											m_pOriginalMesh->property(f_location,*vf_it)=inside;
-											polymesh.property(f_area,*f2_it)+=Area*t22;	
-										}
-										else //0-2-1,0-1-2,0-0-3
-										{
-											double  tri_umin=(A[0]<=B[0]?A[0]:(B[0]<=C[0]?B[0]:C[0]));
-											double  tri_umax=(A[0]<=B[0]?B[0]:(A[0]<=C[0]?C[0]:A[0]));
-											double  tri_vmin=(A[1]<=B[1]?A[1]:(B[1]<=C[1]?B[1]:C[1]));
-											double  tri_vmax=(A[1]<=B[1]?B[1]:(A[1]<=C[1]?C[1]:A[1]));
-											if(tri_umax<=uknots_min||tri_umin>=uknots_max||tri_vmin>=vknots_max||tri_vmax<=vknots_min)
-											{
-												m_pOriginalMesh->property(f_location,*vf_it)=outside;
-											}
-											else
-											{
-												Triangle_2  tri(Point_2 (A[0],A[1]),Point_2 (B[0],B[1]),Point_2 (C[0],C[1]));
-												Iso_rectangle_2  rec(uknots_min,vknots_min,uknots_max,vknots_max);
-												if(intersection_rt(tri,rec,&Area))
-												{
-													polymesh.property(f_area,*f2_it)+=Area*t22;		
-												}
-
-												m_pOriginalMesh->property(f_location,*vf_it)=boundary;
-											}
-										}
-
-									}
-								}
-							}
-
-						}
-						v1.assign(v3.begin(),v3.end());
-						if (v1.empty())
-						{
-							break;
-						}
-						turn++;
-
-					} while (turn<20);
-
-					assert(polymesh.property(f_area,*f2_it)!=0.0);
-
+					Mesh::FaceHandle  fh3=m_pOriginalMesh->face_handle(*s_it);
+					polymesh.property(f_area,*f_it)+= m_pOriginalMesh->property(tri_integral,fh3);
 
 				}
 			}
-
 			//求解各个小矩形的误差
 			MyMesh::FaceIter face_iter,face_end(polymesh.faces_end());
 			vector<double> error_cur;
@@ -3169,7 +2278,7 @@ void CSurfaceData::update_polymesh()
 			for (face_iter=polymesh.faces_begin();face_iter!=face_end;++face_iter)
 			{
 				g=abs(polymesh.property(f_area,*face_iter)-curaverage_)/curaverage_;
-				error_cur.push_back(g);
+                error_cur.push_back(g);
 				polymesh.property(f_error,*face_iter)=g;
 
 			}
@@ -3506,7 +2615,7 @@ void  CSurfaceData::update_knots(int k)
 			{
 				g+=pow(polymesh.property(f_area,*face_iter)-curaverage_,2);
 			}
-			error_sum.push_back(g);
+		/*	error_sum.push_back(g);*/
 			std::cout<<"第"<<" "<<iter_num++<<" "<<"次函数值:"<<g<<" ";
 
 			//准备梯度
@@ -3638,12 +2747,12 @@ void  CSurfaceData::update_knots(int k)
 			double vh=vdmin/10*pow(0.5,k/static_cast<double>(iter_times-k));
 			for (int i=1;i<=unum-2;i++)
 			{
-				double  dis2=uh*uknot_grad[i-1]/abs(uknot_grad[i-1]);
+				double  dis2=uh*(uknot_grad[i-1]==0.?0.:uknot_grad[i-1]/abs(uknot_grad[i-1]));
 				uknots[i]-=dis2;
 			}
 			for (int j=1;j<=vnum-2;j++)
 			{
-				double  dis2=vh*vknot_grad[j-1]/abs(vknot_grad[j-1]);
+				double  dis2=vh*(vknot_grad[j-1]==0.?0.:vknot_grad[j-1]/abs(vknot_grad[j-1]));
 				vknots[j]-=dis2;
 
 			}
@@ -4191,7 +3300,7 @@ void  CSurfaceData::update_knots2(int k)
 			{
 				g+=pow(polymesh.property(f_area,*face_iter)-erroraverage_,2);
 			}
-			error_sum.push_back(g);
+			/*error_sum.push_back(g);*/
 			std::cout<<"第"<<" "<<iter_num++<<" "<<"次函数值:"<<g<<" ";
 
 			//准备梯度

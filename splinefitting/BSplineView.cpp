@@ -44,6 +44,8 @@ CBSplineSurfaceView::CBSplineSurfaceView()
 CBSplineSurfaceView ::~CBSplineSurfaceView()
 {
    delete m_pFittedMesh;
+   m_pFittedMesh=NULL;
+
 }
 bool CBSplineSurfaceView::solvecontrolpoint(Mesh *mesh)
 {

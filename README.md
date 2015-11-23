@@ -47,6 +47,11 @@
   + 增加函数： void   build_polymesh_with_query(MyMesh& polymesh_new);
   与  MyMesh build_polymesh();使得原来在update_knots中建立和查询polymesh的功能分离开来。
   + 去掉GetFirstk，改在location中使用lower_bound(),简化代码
+- 2015年11月23日
+  + 修复错误void CSurfaceData::clear_data()中m_pFittedMesh的删除;
+   CBSplineSurfaceView ::~CBSplineSurfaceView()添加m_pFittedMesh = NULL;
+  + 增加函数 void  query_isolated_range(); 
+  + void mainwindow::input_parameter()中添加推荐m,n值功能，在输入m,n的时候。主要依据网格点数多少   
 
 
 
