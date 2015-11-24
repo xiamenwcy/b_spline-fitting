@@ -125,7 +125,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="qtmaind.lib QtCored4.lib QtGuid4.lib QtXmld4.lib QtOpenGLd4.lib opengl32.lib glu32.lib QGLViewerd2.lib OpenMeshCored.lib OpenMeshToolsd.lib ANN.lib"
+				AdditionalDependencies="qtmaind.lib QtCored4.lib QtGuid4.lib QtXmld4.lib QtOpenGLd4.lib opengl32.lib glu32.lib QGLViewerd2.lib OpenMeshCored.lib OpenMeshToolsd.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				AdditionalLibraryDirectories="$(QTDIR)\lib"
 				GenerateDebugInformation="true"

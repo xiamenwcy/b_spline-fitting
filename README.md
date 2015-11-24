@@ -52,7 +52,11 @@
    CBSplineSurfaceView ::~CBSplineSurfaceView()添加m_pFittedMesh = NULL;
   + 增加函数 void  query_isolated_range(); 
   + void mainwindow::input_parameter()中添加推荐m,n值功能，在输入m,n的时候。主要依据网格点数多少   
-
+- 2015年11月24日
+  + 修改线性方程组的系数矩阵的填充方法，改为先填充三元组，再填充稀疏矩阵
+  + 改造void mainwindow::adjust_knots_by_fitting_error()，去掉迭代，改为直接添加合适的节点线
+  + 增加函数void  vertical_range_query(); 与 void  horizon_range_query(); 
+  + 去除kd tree.
 
 
 

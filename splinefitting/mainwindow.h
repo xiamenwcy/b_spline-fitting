@@ -116,6 +116,7 @@ private slots:
 	/**   close fitwindow                 */
 		void fitwindow_close();		
 
+
 private:
 	/**      create Actions                 */
 	void createActions();
@@ -142,6 +143,8 @@ private:
 	/**     Current file                    */
     QString curFile;
 
+	bool  error_query_vertical;             /**< 增加u节点时询问拟合误差是否计算好  */
+	bool  error_query_horizon;              /**< 增加v节点时询问拟合误差是否计算好 */
 
 	/**     File   Menu                      */
 	QMenu *fileMenu;

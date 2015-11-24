@@ -90,9 +90,15 @@ bool CBSplineSurfaceView::solvecontrolpoint(Mesh *mesh)
 		ControlPoint[i].resize(n+1);
 	}
 
+
+//---------------------------------------------------------------------求取控制顶点方程系数A 
 	Mesh::VertexIter          v_it, v_end(mesh->vertices_end());
-	SparseMatrix<double>  A(p_num,(m+1)*(n+1));
-	//求取控制顶点方程系数A 
+	Eigen::SparseMatrix<double>  A(p_num,(m+1)*(n+1));  //系数矩阵
+
+	typedef Eigen::Triplet<double> T;
+	std::vector<T> tripletList;
+	tripletList.reserve((m+1)*(n+1)*p_num);
+
 	int row_index=0;
 	int k=0;int l=0;
 	for (v_it=mesh->vertices_begin();v_it!=v_end;++v_it,++row_index)
@@ -101,7 +107,6 @@ bool CBSplineSurfaceView::solvecontrolpoint(Mesh *mesh)
 		double u=vt[0];
 		double v=vt[1];
 		int sum=0;
-
 		for (int j=0;j<(m+1)*(n+1);j++)
 		{
 			k=j/(n+1);
@@ -112,7 +117,7 @@ bool CBSplineSurfaceView::solvecontrolpoint(Mesh *mesh)
 				double t2=Base(l,q+1,vknot,n+q+2,v);
 				if (t1!=0&&t2!=0)
 				{
-					A.coeffRef(row_index,j)=t1*t2;
+					tripletList.push_back(T(row_index,j,t1*t2));
                      sum++;
 				}
 
@@ -120,6 +125,9 @@ bool CBSplineSurfaceView::solvecontrolpoint(Mesh *mesh)
 		}
 		num<<"第"<<row_index<<"行的非零数为"<<sum<<endl;
 	}
+	A.setFromTriplets(tripletList.begin(), tripletList.end());
+	// mat is ready to go!
+
 		for (int i=0;i<m+p+2;i++)
 		{
 			num<<"u"<<"["<<i<<"]="<<uknot[i]<<endl;
@@ -129,7 +137,8 @@ bool CBSplineSurfaceView::solvecontrolpoint(Mesh *mesh)
 		{
 			num<<"v"<<"["<<i<<"]="<<vknot[i]<<endl;
 		}
-		//求解方程右端矩阵b 
+
+//---------------------------------------------------------------------------------求解方程右端矩阵b 
 		MatrixXd b(p_num,3),P((m+1)*(n+1),3);
 		int h=0;
 		for (v_it=mesh->vertices_begin(); v_it!=v_end; ++v_it)
@@ -140,7 +149,7 @@ bool CBSplineSurfaceView::solvecontrolpoint(Mesh *mesh)
 			h++;
 
 		}
-	
+//----------------------------------------------------------------------------求解方程组	
 		SparseMatrix<double>  B=A.transpose()*A;
 		B.makeCompressed(); 
 		SparseQR<SparseMatrix<double>,COLAMDOrdering<int> >  solver;

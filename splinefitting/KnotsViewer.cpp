@@ -174,16 +174,16 @@ void KnotsViewer::draw_knots()
 	for (int i=0;i<n_u;i++)
 	{
 		glBegin(GL_LINES);
-		glVertex2d(surfacedata->uknots_new[i].knot,0);
-		glVertex2d(surfacedata->uknots_new[i].knot,1);
+		glVertex2d(surfacedata->uknots_new[i],0);
+		glVertex2d(surfacedata->uknots_new[i],1);
 		glEnd();
 	}
 	//‘Ÿª≠vœﬂ
 	for (int i=0;i<n_v;i++)
 	{
 		glBegin(GL_LINES);
-		glVertex2d(0,surfacedata->vknots_new[i].knot);
-		glVertex2d(1,surfacedata->vknots_new[i].knot);
+		glVertex2d(0,surfacedata->vknots_new[i]);
+		glVertex2d(1,surfacedata->vknots_new[i]);
 		glEnd();
 	}
 
@@ -612,13 +612,9 @@ void KnotsViewer::error_fitting_view(bool kv)
 		if(!m_pFittedMesh)
 			return;
 		double mean_error;
-		//Max_Error max_error=surfacedata->get_max_error();
-		//if(error == NULL)
-		//{
-		/*if(max_error.index==-1)
-		  {*/
-			surfacedata->compute_error();
-	     /* }*/
+	
+		surfacedata->compute_error();
+
 		mean_error = surfacedata->get_mean_error();
 		QString str = "The mean error between original surface and the fitted surface is ";
 		str.append(QString::number(mean_error));

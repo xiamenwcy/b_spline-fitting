@@ -61,6 +61,9 @@ mainwindow::mainwindow(void)
 	connect(knotswindow, SIGNAL(window_close()), this, SLOT(knotswindow_close()));
     connect(fitwindow, SIGNAL(window_close()), this, SLOT(fitwindow_close()));
 	setWindowTitle("B_Spline Fitting");
+
+	error_query_vertical=false;
+	error_query_horizon=false;
 }
 
 mainwindow::~mainwindow(void)
@@ -535,9 +538,9 @@ input:
 			if(pointNum!=-1)
 			{
 				double  epsi=pow(sqrt(double(pointNum)),-1); 
-				Recommended_m=int(1.0/(epsi*3))-1+p;
+				Recommended_m=int(1.0/(epsi*5))-1+p;
 				Recommended_m=Recommended_m<p?p:Recommended_m;
-				Recommended_n=int(1.0/(epsi*3))-1+q;
+				Recommended_n=int(1.0/(epsi*5))-1+q;
 				Recommended_n=Recommended_n<q?q:Recommended_n;
 			}
 			else
@@ -581,17 +584,31 @@ void mainwindow::add_vertical_knots()
 {
 	if (surfacedata==NULL)
 		return;
-	bool ok;
-	int value1=QInputDialog::getInt(this,tr("Knots adding num every time"),tr("Please input Vertical_Knots_adding num:"),10,0,100,1,&ok);
-	if(!ok)
-		return;
-	surfacedata->set_knots_adding_num(value1);
-	if(!surfacedata->add_knots())
+	if(!error_query_horizon)
 	{
-		QMessageBox::critical(this,tr("Knots Updating:"),tr("Knots has NOT been updated yet,please check error."),QMessageBox::Ok);
+       
+		int ret1=QMessageBox::question(this,tr("Fitting Error:"),tr("Fitting Error has completed ?  If not,please compute fitting error."),QMessageBox::Yes,QMessageBox::No);
+	    if(ret1==QMessageBox::No)
+		{
+			error_query_vertical=false;
+			return;
+		}
+		else
+		{
+			 error_query_vertical=true;
+		}
+	}
+	else
+	{
+		error_query_horizon=false;
+
+	}
+	if(!surfacedata->add_vertical_knots())
+	{
+		QMessageBox::critical(this,tr("Knots Updating:"),tr("Vertical Knots has NOT been updated yet,please check error."),QMessageBox::Ok);
 		return;
 	}
-	QMessageBox::information(this,tr("Knots Updating:"),tr("Knots has  been updated ,please check knots configuration in the Knot Window."),QMessageBox::Ok);
+	QMessageBox::information(this,tr("Knots Updating:"),tr("Vertical Knots has  been updated ,please check knots configuration in the Knot Window."),QMessageBox::Ok);
 
 
 }
@@ -599,11 +616,24 @@ void mainwindow::add_horizon_knots()
 {
 	if (surfacedata==NULL)
 		return;
-	bool ok;
-	int value1=QInputDialog::getInt(this,tr("Knots adding num every time"),tr("Please input Horizon_Knots_adding num:"),10,0,100,1,&ok);
-	if(!ok)
-		return;
-	surfacedata->set_horizon_knots_addnum(value1);
+	if(!error_query_vertical)
+	{
+		int ret1=QMessageBox::question(this,tr("Fitting Error:"),tr("Fitting Error has completed ?  If not,please compute fitting error."),QMessageBox::Yes,QMessageBox::No);
+		if(ret1==QMessageBox::No)
+		{
+			error_query_horizon=false;
+			return;
+		}
+		else
+		{
+           error_query_horizon=true;
+		}
+	}
+	else
+	{
+		error_query_vertical=false;
+
+	}
 	if(!surfacedata->add_horizon_knots())
 	{
 		QMessageBox::critical(this,tr("Knots Updating:"),tr("Horizonal  knots has NOT been updated yet,please check error."),QMessageBox::Ok);
@@ -638,11 +668,6 @@ void  mainwindow::adjust_knots_by_curvature()
 }
 void mainwindow::adjust_knots_by_fitting_error()
 {
-	bool ok;
-	int value1=QInputDialog::getInt(this,tr("Iteration Times inputting"),tr("Please input iteration times :"),-1,-1,100,1,&ok);
-	if(!ok)
-		return;
-	surfacedata->set_knots_iteration_times(value1);
 	if(!surfacedata->adjust_knots_by_fitting_error())
 	{
 		QMessageBox::critical(this,tr("Knots Updating:"),tr("Knots has NOT been updated yet,please check error."),QMessageBox::Ok);
