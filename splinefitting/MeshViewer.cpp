@@ -190,15 +190,15 @@ void MeshViewer::draw_original_mesh()
 		for (; f_it!=f_end; ++f_it)
 		{
 			//GL::glNormal(mesh.normal(f_it));
-			fv_it = mesh->cfv_iter(f_it.handle()); 
-			glNormal3dv(&mesh->normal(fv_it)[0]);
-			GL::glVertex(mesh->point(fv_it));
+			fv_it = mesh->cfv_iter(*f_it); 
+			glNormal3dv(&mesh->normal(*fv_it)[0]);
+			GL::glVertex(mesh->point(*fv_it));
 			++fv_it;
-			glNormal3dv(&mesh->normal(fv_it)[0]);
-			GL::glVertex(mesh->point(fv_it));
+			glNormal3dv(&mesh->normal(*fv_it)[0]);
+			GL::glVertex(mesh->point(*fv_it));
 			++fv_it;
-			glNormal3dv(&mesh->normal(fv_it)[0]);
-			GL::glVertex(mesh->point(fv_it));
+			glNormal3dv(&mesh->normal(*fv_it)[0]);
+			GL::glVertex(mesh->point(*fv_it));
 		}
 		glEnd();
 	}
@@ -222,18 +222,18 @@ void MeshViewer::draw_curvature_mesh()
 		glBegin(GL_TRIANGLES);
 		for (; f_it!=f_end; ++f_it)
 		{
-			fv_it = mesh->cfv_iter(f_it.handle()); 
+			fv_it = mesh->cfv_iter(*f_it); 
 			glColor3ubv(mesh->color(*fv_it).data());
-			glNormal3dv(&mesh->normal(fv_it)[0]);
-			GL::glVertex(mesh->point(fv_it));
+			glNormal3dv(&mesh->normal(*fv_it)[0]);
+			GL::glVertex(mesh->point(*fv_it));
 			++fv_it;
 			glColor3ubv(mesh->color(*fv_it).data());
-			glNormal3dv(&mesh->normal(fv_it)[0]);
-			GL::glVertex(mesh->point(fv_it));
+			glNormal3dv(&mesh->normal(*fv_it)[0]);
+			GL::glVertex(mesh->point(*fv_it));
 			++fv_it;
 			glColor3ubv(mesh->color(*fv_it).data());
-			glNormal3dv(&mesh->normal(fv_it)[0]);
-			GL::glVertex(mesh->point(fv_it));
+			glNormal3dv(&mesh->normal(*fv_it)[0]);
+			GL::glVertex(mesh->point(*fv_it));
 		}
 		glEnd();
 

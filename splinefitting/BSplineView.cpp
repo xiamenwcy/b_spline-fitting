@@ -97,7 +97,7 @@ bool CBSplineSurfaceView::solvecontrolpoint(Mesh *mesh)
 
 	typedef Eigen::Triplet<double> T;
 	std::vector<T> tripletList;
-	tripletList.reserve((m+1)*(n+1)*p_num);
+//	tripletList.reserve((m+1)*(n+1)*p_num);  //被弃用，一旦p_num过大，会发生问题。参考tripletList.max_size()
 
 	int row_index=0;
 	int k=0;int l=0;
