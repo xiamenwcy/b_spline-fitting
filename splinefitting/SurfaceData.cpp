@@ -496,7 +496,7 @@ bool CSurfaceData::add_vertical_knots()
 			}
 		}
 		meanerr/=num;
-		double cur1=0.3*meanerr+0.7*maxerr.error;
+		double cur1=0.2*meanerr+0.8*maxerr.error;
 		cout<<"第"<<i+1<<"条竖直条形的平均误差:"<<meanerr<<" "<<"最大误差:"<<maxerr.error<<"加权误差"<<cur1<<endl;
 		errorvec.push_back(cur1);
 		vertical_max_index.push_back(maxerr.index);
@@ -509,15 +509,20 @@ bool CSurfaceData::add_vertical_knots()
 	//---------------------------------------------------计算加权误差的平均值
 
 	double error_avg=accumulate(errorvec.begin(),errorvec.end(),0.)/(errorvec.size());
+	double error_max=*max_element(errorvec.begin(),errorvec.end());
 
 	cout<<"所有竖直条形的加权误差平均值为:"<<" "<<error_avg<<endl;
+
+	double error_avg2=(error_avg+error_max)/2; 
+
+	cout<<"所有竖直条形的加权误差1/4峰值为:"<<" "<<error_avg2<<endl;
 
 	//-----------------------------------------------------开始增加
 	uknots_new.clear();//在使用之前先清零
 
 	for (int i=0;i<unum-1;i++)
 	{
-		if (errorvec[i]>error_avg)   //在平均线以上增加节点线
+		if (errorvec[i]>=error_avg2)   //在1/4峰值线以上增加节点线
 		{
 			double x1=0;
 			double  err_sum=0;
@@ -581,7 +586,7 @@ bool CSurfaceData::add_horizon_knots()
 		   }
 	   }
 	   meanerr/=num;
-	   double cur1=0.3*meanerr+0.7*maxerr.error;
+	   double cur1=0.2*meanerr+0.8*maxerr.error;
 	   cout<<"第"<<i+1<<"水平条形的平均误差:"<<meanerr<<" "<<"最大误差:"<<maxerr.error<<"加权误差"<<cur1<<endl;
 	   errorvec.push_back(cur1);
 	   horizon_max_index.push_back(maxerr.index);
@@ -594,7 +599,13 @@ bool CSurfaceData::add_horizon_knots()
 
    double error_avg=accumulate(errorvec.begin(),errorvec.end(),0.)/(errorvec.size());
 
+   double error_max=*max_element(errorvec.begin(),errorvec.end());
+
    cout<<"所有水平条形的加权误差平均值为:"<<" "<<error_avg<<endl;
+
+   double error_avg2=(error_avg+error_max)/2; 
+
+   cout<<"所有水平条形的加权误差1/4峰值为:"<<" "<<error_avg2<<endl;
 
    //-----------------------------------------------------开始增加
    vknots_new.clear();//在使用之前先清零
@@ -602,7 +613,7 @@ bool CSurfaceData::add_horizon_knots()
    for (int j=0;j<vnum-1;j++)
    {
 
-	   if (errorvec[j]>error_avg)   //在平均线以上增加节点线
+	   if (errorvec[j]>error_avg2)   //在平均线以上增加节点线
 	   {
 		   double y1=0;
 		   double  err_sum=0;
@@ -1113,7 +1124,7 @@ void CSurfaceData::modification()
 {
 	//-------------------------------------------------------------删除过密的节点线
 	//------------------------------------------------------处理uknots
-	double  epsi=2*pow(sqrt(double(sample_num)),-1);
+	double  epsi=(sample_num<10000?1:2)*pow(sqrt(double(sample_num)),-1);
 	viterator uiter=uknots.begin();
 	advance(uiter,1);
 	//u[1]确定
@@ -1513,7 +1524,7 @@ bool CSurfaceData::intersection_st( Triangle_2 tri,Segment_2 seg,double *length)
 }
 
 
-int CSurfaceData::location(vector<double>& uknots,vector<double>& vknots,TexCoord& p)
+inline int CSurfaceData::location(vector<double>& uknots,vector<double>& vknots,TexCoord& p)
 {
 	if (uknots.empty() || vknots.empty())
 	{
@@ -1877,8 +1888,8 @@ void  CSurfaceData::update_knots(int k)
 					vdmin=vknots[r+1]-vknots[r];
 				}
 			}
-			double uh=udmin/10*pow(0.5,k/static_cast<double>(iter_times-k));
-			double vh=vdmin/10*pow(0.5,k/static_cast<double>(iter_times-k));
+			double uh=udmin/5*pow(0.5,k/static_cast<double>(iter_times-k));
+			double vh=vdmin/5*pow(0.5,k/static_cast<double>(iter_times-k));
 			for (int i=1;i<=unum-2;i++)
 			{
 				double  dis2=uh*(uknot_grad[i-1]==0.?0.:uknot_grad[i-1]/abs(uknot_grad[i-1]));

@@ -205,13 +205,13 @@ void KnotsViewer::draw_fitting_error_domain()
 		glBegin(GL_TRIANGLES);
 		fv_it = mesh->cfv_iter(*f_it); 
 		glColor3ubv(mesh->color(*fv_it).data());
-		glVertex2dv(&mesh->texcoord2D(fv_it)[0]);
+		glVertex2dv(&mesh->texcoord2D(*fv_it)[0]);
 		++fv_it;
 		glColor3ubv(mesh->color(*fv_it).data());
-		glVertex2dv(&mesh->texcoord2D(fv_it)[0]);
+		glVertex2dv(&mesh->texcoord2D(*fv_it)[0]);
 		++fv_it;
 		glColor3ubv(mesh->color(*fv_it).data());
-		glVertex2dv(&mesh->texcoord2D(fv_it)[0]);
+		glVertex2dv(&mesh->texcoord2D(*fv_it)[0]);
 		glEnd();
 	}
 
@@ -239,11 +239,11 @@ void KnotsViewer::draw_domain_mesh()
 	{
 		glBegin(GL_LINE_LOOP);
 		fv_it = mesh->cfv_iter(*f_it); 
-		glVertex2dv(&mesh->texcoord2D(fv_it)[0]);
+		glVertex2dv(&mesh->texcoord2D(*fv_it)[0]);
 		++fv_it;
-		glVertex2dv(&mesh->texcoord2D(fv_it)[0]);
+		glVertex2dv(&mesh->texcoord2D(*fv_it)[0]);
 		++fv_it;
-		glVertex2dv(&mesh->texcoord2D(fv_it)[0]);
+		glVertex2dv(&mesh->texcoord2D(*fv_it)[0]);
 		glEnd();
 	}
 	
@@ -297,13 +297,13 @@ void KnotsViewer::draw_curvature_mesh()
 		glBegin(GL_TRIANGLES);
 		fv_it = mesh->cfv_iter(*f_it); 
 		glColor3ubv(mesh->color(*fv_it).data());
-		glVertex2dv(&mesh->texcoord2D(fv_it)[0]);
+		glVertex2dv(&mesh->texcoord2D(*fv_it)[0]);
 		++fv_it;
 		glColor3ubv(mesh->color(*fv_it).data());
-		glVertex2dv(&mesh->texcoord2D(fv_it)[0]);
+		glVertex2dv(&mesh->texcoord2D(*fv_it)[0]);
 		++fv_it;
 		glColor3ubv(mesh->color(*fv_it).data());
-		glVertex2dv(&mesh->texcoord2D(fv_it)[0]);
+		glVertex2dv(&mesh->texcoord2D(*fv_it)[0]);
 		glEnd();
 	}
 	
@@ -392,13 +392,13 @@ void KnotsViewer::draw_curvature_error_domain()
 		glColor3ubv(polymesh.color(*f_it).data());
 		glBegin(GL_POLYGON);
 		fv_it = polymesh.cfv_iter(*f_it); 
-		glVertex3dv(&polymesh.point(fv_it)[0]);
+		glVertex3dv(&polymesh.point(*fv_it)[0]);
 		++fv_it;
-		glVertex3dv(&polymesh.point(fv_it)[0]);
+		glVertex3dv(&polymesh.point(*fv_it)[0]);
 		++fv_it;
-		glVertex3dv(&polymesh.point(fv_it)[0]);
+		glVertex3dv(&polymesh.point(*fv_it)[0]);
 		++fv_it;
-		glVertex3dv(&polymesh.point(fv_it)[0]);
+		glVertex3dv(&polymesh.point(*fv_it)[0]);
 		glEnd();
 	}
 

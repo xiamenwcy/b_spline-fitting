@@ -21,10 +21,8 @@
 #include <fstream>
 
 //Eigen
-#include <Eigen/SparseCholesky>
-#include <Eigen/IterativeLinearSolvers>
-#include <Eigen/SparseQR>
-#include <Eigen/Eigenvalues>
+#include <Eigen/Eigen>
+#include <Eigen/SPQRSupport>
 
 #include "BSplineView.h"
 
@@ -92,12 +90,22 @@ bool CBSplineSurfaceView::solvecontrolpoint(Mesh *mesh)
 
 
 //---------------------------------------------------------------------求取控制顶点方程系数A 
+	//计时开始
+	_LARGE_INTEGER time_start;    /*开始时间*/
+	_LARGE_INTEGER time_over1,time_over;       /*结束时间*/
+	double dqFreq;                /*计时器频率*/
+	LARGE_INTEGER f;            /*计时器频率*/
+	QueryPerformanceFrequency(&f);
+	dqFreq=(double)f.QuadPart;
+	QueryPerformanceCounter(&time_start);
+    cout<<"填充矩阵开始......."<<endl;
+
 	Mesh::VertexIter          v_it, v_end(mesh->vertices_end());
 	Eigen::SparseMatrix<double>  A(p_num,(m+1)*(n+1));  //系数矩阵
 
 	typedef Eigen::Triplet<double> T;
 	std::vector<T> tripletList;
-	tripletList.reserve((m+1)*(n+1)*p_num);
+	tripletList.reserve(/*(m+1)*(n+1)**/p_num);
 
 	int row_index=0;
 	int k=0;int l=0;
@@ -125,7 +133,12 @@ bool CBSplineSurfaceView::solvecontrolpoint(Mesh *mesh)
 		}
 		num<<"第"<<row_index<<"行的非零数为"<<sum<<endl;
 	}
+	//计时结束
+	QueryPerformanceCounter(&time_over1); 
+	cout<<"填充矩阵耗时:"<<((time_over1.QuadPart-time_start.QuadPart)/dqFreq)<<"s"<<endl;
+
 	A.setFromTriplets(tripletList.begin(), tripletList.end());
+	tripletList.clear();
 	// mat is ready to go!
 
 		for (int i=0;i<m+p+2;i++)
@@ -149,20 +162,25 @@ bool CBSplineSurfaceView::solvecontrolpoint(Mesh *mesh)
 			h++;
 
 		}
-//----------------------------------------------------------------------------求解方程组	
-		SparseMatrix<double>  B=A.transpose()*A;
-		B.makeCompressed(); 
-		SparseQR<SparseMatrix<double>,COLAMDOrdering<int> >  solver;
-		solver.compute(B);
+//----------------------------------------------------------------------------求解方程组
+
+		SPQR < SparseMatrix < double > > solver ;
+
+		solver.compute(A);
 		if(solver.info()!=Success) {
 			// decomposition failed
 			return false;
 		}
-		P=solver.solve(A.transpose()*b);
+		P=solver.solve(b);
 		if(solver.info()!=Success) {
 			// solving failed
 			return false;
 		}
+
+		//计时结束
+		QueryPerformanceCounter(&time_over); 
+		cout<<"求解线性方程组耗时:"<<((time_over.QuadPart-time_over1.QuadPart)/dqFreq)<<"s"<<endl;
+
 		//将结果赋予控制点 
 		if (out_file.is_open()) 
 		{

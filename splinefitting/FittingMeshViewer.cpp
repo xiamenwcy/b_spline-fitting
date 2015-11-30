@@ -238,15 +238,15 @@ void FittingMeshViewer::draw_fitted_mesh()
 		glBegin(GL_TRIANGLES);
 		for (; f_it!=f_end; ++f_it)
 		{
-			fv_it = mesh->cfv_iter(f_it.handle()); 
-			glNormal3dv(&mesh->normal(fv_it)[0]);
-			GL::glVertex(mesh->point(fv_it));
+			fv_it = mesh->cfv_iter(*f_it); 
+			glNormal3dv(&mesh->normal(*fv_it)[0]);
+			GL::glVertex(mesh->point(*fv_it));
 			++fv_it;
-			glNormal3dv(&mesh->normal(fv_it)[0]);
-			GL::glVertex(mesh->point(fv_it));
+			glNormal3dv(&mesh->normal(*fv_it)[0]);
+			GL::glVertex(mesh->point(*fv_it));
 			++fv_it;
-			glNormal3dv(&mesh->normal(fv_it)[0]);
-			GL::glVertex(mesh->point(fv_it));
+			glNormal3dv(&mesh->normal(*fv_it)[0]);
+			GL::glVertex(mesh->point(*fv_it));
 		}
 		glEnd();
 	}
@@ -270,18 +270,18 @@ void FittingMeshViewer::draw_error_mesh()
 		glBegin(GL_TRIANGLES);
 		for (; f_it!=f_end; ++f_it)
 		{
-			fv_it = mesh->cfv_iter(f_it.handle()); 
+			fv_it = mesh->cfv_iter(*f_it); 
 			glColor3ubv(mesh->color(*fv_it).data());
-			glNormal3dv(&mesh->normal(fv_it)[0]);
-			GL::glVertex(mesh->point(fv_it));
+			glNormal3dv(&mesh->normal(*fv_it)[0]);
+			GL::glVertex(mesh->point(*fv_it));
 			++fv_it;
 			glColor3ubv(mesh->color(*fv_it).data());
-			glNormal3dv(&mesh->normal(fv_it)[0]);
-			GL::glVertex(mesh->point(fv_it));
+			glNormal3dv(&mesh->normal(*fv_it)[0]);
+			GL::glVertex(mesh->point(*fv_it));
 			++fv_it;
 			glColor3ubv(mesh->color(*fv_it).data());
-			glNormal3dv(&mesh->normal(fv_it)[0]);
-			GL::glVertex(mesh->point(fv_it));
+			glNormal3dv(&mesh->normal(*fv_it)[0]);
+			GL::glVertex(mesh->point(*fv_it));
 		}
 		glEnd();
 		
