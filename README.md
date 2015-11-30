@@ -58,9 +58,10 @@
   + 增加函数void  vertical_range_query(); 与 void  horizon_range_query(); 
   + 去除kd tree.
 - 2015年11月30日
-  + 改openmesh中迭代器返回句柄的方法由 迭代器.handle()---->\**+迭代器
+  + 改openmesh中迭代器返回句柄的方法由 ``iter.handle()---->*+iter``
   + 将拟合过程中的SparseQR方法改为SPQR方法，后者由SuiteSparse package支持，安装方法见http://blog.csdn.net/xiamentingtao/article/details/50100549
-  + bool CBSplineSurfaceView::solvecontrolpoint(Mesh *mesh) 中改 tripletList.reserve((m+1)\*(n+1)\*p_num);为tripletList.reserve(p_num);否则后者随着m,n放大，会超过vector支持的最大分配内存容量.最好的方法是不加这句话，改用C++11的emplace_back代替push_back 
+  + ``bool CBSplineSurfaceView::solvecontrolpoint(Mesh *mesh)`` 中改 
+  ``tripletList.reserve((m+1)*(n+1)*p_num);``为``tripletList.reserve(p_num);``否则后者随着m,n放大，会超过vector支持的最大分配内存容量.最好的方法是不加这句话，改用C++11的emplace_back代替push_back 
 
 
 
