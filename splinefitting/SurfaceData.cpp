@@ -1124,7 +1124,7 @@ void CSurfaceData::modification()
 {
 	//-------------------------------------------------------------删除过密的节点线
 	//------------------------------------------------------处理uknots
-	double  epsi=(sample_num<10000?1:2)*pow(sqrt(double(sample_num)),-1);
+	double  epsi=/*(sample_num<10000?1:2)**/pow(sqrt(double(sample_num)),-1);
 	viterator uiter=uknots.begin();
 	advance(uiter,1);
 	//u[1]确定
@@ -1663,10 +1663,10 @@ void  CSurfaceData::update_knots(int k)
 			OpenMesh::EPropHandleT<double> e_area;  //增加每条边的曲率积分属性
 			polymesh.add_property(e_area,"e_area");
 
-			for (MyMesh::EdgeIter  ed=polymesh.edges_begin();ed!=polymesh.edges_end();++ed)
+			/*for (MyMesh::EdgeIter  ed=polymesh.edges_begin();ed!=polymesh.edges_end();++ed)
 			{
 				polymesh.property(e_area,*ed)=0.0;
-			}
+			}*/
 
 			for (MyMesh::FaceIter f2_it=polymesh.faces_begin();f2_it!=polymesh.faces_end();++f2_it)
 			{
@@ -1714,35 +1714,42 @@ void  CSurfaceData::update_knots(int k)
 					test1=c;
 				   }*/
 					//相交集合中的三角形跨越两个矩形区域，所以面积分加多了，减去一半刚刚好
+					double sums=0.,avg;
 					for (setint::iterator iter=c.begin();iter!=c.end();++iter)
                     {
 						Mesh::FaceHandle  fh3=m_pOriginalMesh->face_handle(*iter);
 						double t23=m_pOriginalMesh->property(f_mean_curvature2,fh3);
-						Mesh::FaceVertexIter  fv_it2;
+						sums+=t23;
+						/*Mesh::FaceVertexIter  fv_it2;
 						TexCoord A,B,C;
 						fv_it2=m_pOriginalMesh->fv_iter(fh3);
 						A=m_pOriginalMesh->texcoord2D(*fv_it2);
 						++fv_it2;
 						B=m_pOriginalMesh->texcoord2D(*fv_it2);
 						++fv_it2;
-						C=m_pOriginalMesh->texcoord2D(*fv_it2);
+						C=m_pOriginalMesh->texcoord2D(*fv_it2);*/
 						double  result=m_pOriginalMesh->property(tri_integral,fh3)/2; //积分的一半
 						polymesh.property(f_area,f1)-= result;   
 						polymesh.property(f_area,f2)-= result;  
 
 
-						Triangle_2  tri(Point_2 (A[0],A[1]),Point_2 (B[0],B[1]),Point_2 (C[0],C[1]));
+						/*Triangle_2  tri(Point_2 (A[0],A[1]),Point_2 (B[0],B[1]),Point_2 (C[0],C[1]));
 						MyMesh::VertexHandle     fv=polymesh.from_vertex_handle(he1),tv=polymesh.to_vertex_handle(he1);
 						MyMesh::Point     p1=polymesh.point(fv),p2=polymesh.point(tv);
 						double length=0;
-						bool is=intersection_st(tri,Segment_2(Point_2(p1[0],p1[1]),Point_2(p2[0],p2[1])),&length);
-						assert(is==true);
+						bool is=intersection_st(tri,Segment_2(Point_2(p1[0],p1[1]),Point_2(p2[0],p2[1])),&length);*/
+					/*	assert(is==true);
 						if (is)
 						{
 							assert(length!=0.);
 							polymesh.property(e_area,*e_it)+=t23*length;
-						}
+						}*/
                     }
+					avg=sums/c.size();
+					MyMesh::VertexHandle     fv=polymesh.from_vertex_handle(he1),tv=polymesh.to_vertex_handle(he1);
+					MyMesh::Point     p1=polymesh.point(fv),p2=polymesh.point(tv);
+					double length= (p1-p2).length(); 
+					polymesh.property(e_area,*e_it)=avg*length;
 
  					
  				}
@@ -1888,8 +1895,8 @@ void  CSurfaceData::update_knots(int k)
 					vdmin=vknots[r+1]-vknots[r];
 				}
 			}
-			double uh=udmin/5*pow(0.5,k/static_cast<double>(iter_times-k));
-			double vh=vdmin/5*pow(0.5,k/static_cast<double>(iter_times-k));
+			double uh=udmin/10*pow(0.5,k/static_cast<double>(iter_times-k));
+			double vh=vdmin/10*pow(0.5,k/static_cast<double>(iter_times-k));
 			for (int i=1;i<=unum-2;i++)
 			{
 				double  dis2=uh*(uknot_grad[i-1]==0.?0.:uknot_grad[i-1]/abs(uknot_grad[i-1]));
