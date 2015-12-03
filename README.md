@@ -1,4 +1,4 @@
-# 更新日志
+# 更新日志(使用指南，见[b spline fitting](https://dn-bspline.qbox.me/bspline_html/index.html))
 ---
 - 2015年11月13日 
 
